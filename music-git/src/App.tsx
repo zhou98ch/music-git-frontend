@@ -4,19 +4,19 @@ import {mockTakes} from "./common/types";
 import { TrackView } from "./components/TrackView";
 import { groupTakesByTrack } from "./utils/helpers";
 function App() {
-  const totalDurationSec = 120; 
+  const mockTotalDurationSec = 120; 
+  const mockSongName = "Demo Song";
   const tracks = groupTakesByTrack(mockTakes);
   console.log("Grouped Takes by Track:", tracks);
   return (
     <div style={{ padding: 20, maxWidth: 800, margin: "0 auto" }}>
       <h1>Recording Git - Full Song Timeline</h1>
-      <p>The song lasts 0s → {totalDurationSec}s，all Takes are arranged by time order。</p>
+      <p>The song "{mockSongName}" lasts 0s → {mockTotalDurationSec}s，all Takes are arranged by time order。</p>
 
-      {/* <FullTimeline totalDurationSec={totalDurationSec} takes={mockTakes} /> */}
-      {/* <TrackView trackId="1" date="11-24" takes= {mockTakes} totalDurationSec={totalDurationSec}></TrackView> */}
+
       {
         Object.entries(tracks).map(([trackId, takes])=> (
-          <TrackView trackId={trackId} date={trackId} takes= {takes} totalDurationSec={totalDurationSec}></TrackView> 
+          <TrackView trackId={trackId} date={trackId} takes= {takes} totalDurationSec={mockTotalDurationSec}></TrackView> 
         ))
       }
     </div>
