@@ -21,10 +21,12 @@ export const TrackView : React.FC<TrackViewProps > = ({trackId, date, takes, tot
     }
     </div> */}
     <div className="track-row" style={{background: " #ffe2ceff"}}>
-        <p>.</p>
+        {/* <p>.</p> */}
         <div className="track-title" style={{background: " #fff0ceff"}}>Track on {trackId}</div>
         { Object.entries(lanes).map(([laneId, laneTakes])=> (
-            <div className="lane-row" key = {laneId} style={{background: " #c8c8c8ff"}}> Lane {laneId}: 
+            <div className="lane-row" key = {laneId} style={{background: " #dbceffff"}}>
+                {/* <p>.</p> */}
+                <div className="lane-title" style={{background: " #c8c8c8ff"}}> Lane {laneId}: </div>
                 {
                     laneTakes.map((take) => (
                         <div className="take-block" key = {take.id} style={{
@@ -32,16 +34,17 @@ export const TrackView : React.FC<TrackViewProps > = ({trackId, date, takes, tot
                             background: "#ddeeff",
                             borderRadius: "4px",
                             display: "inline-block",
-                            gap: "8px",
+                            marginRight: "8px",
                             marginBottom: "6px",}}
                         > Take {take.id}: {take.startSec}s → {take.endSec}s </div>
                     ))
                 }
+                {/* <p>.</p> */}
             </div>
                 
         ))
         }
-    <p>.</p>
+    {/* <p>.</p> */}
     </div>
     </>
     )
