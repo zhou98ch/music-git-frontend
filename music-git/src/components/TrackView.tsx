@@ -27,18 +27,48 @@ export const TrackView : React.FC<TrackViewProps > = ({trackId, date, takes, tot
             <div className="lane-row" key = {laneId} style={{background: " #dbceffff"}}>
                 {/* <p>.</p> */}
                 <div className="lane-title" style={{background: " #c8c8c8ff"}}> Lane {laneId}: </div>
-                {
-                    laneTakes.map((take) => (
-                        <div className="take-block" key = {take.id} style={{
-                            padding: "4px 8px",
-                            background: "#ddeeff",
-                            borderRadius: "4px",
-                            display: "inline-block",
-                            marginRight: "8px",
-                            marginBottom: "6px",}}
-                        > Take {take.id}: {take.startSec}s → {take.endSec}s </div>
-                    ))
-                }
+                    <div
+                        style={{
+                        position: "relative",
+                        height: "32px",
+                        border: "1px solid #aaa",
+                        borderRadius: "4px",
+                        background: "#f7f7f7",
+                        overflow: "hidden",
+                        }}
+                    >
+                        
+                            
+                        {laneTakes.map((take) => {
+                            const leftPercent = (take.startSec / totalDurationSec) * 100;
+                            const widthPercent = ((take.endSec - take.startSec) / totalDurationSec) * 100;
+
+                            return(
+                                <div className="take-block" key = {take.id}       
+                                    style={{
+                                        position: "absolute",
+                                        left: `${leftPercent}%`,
+                                        width: `${widthPercent}%`,
+                                        top: "4px",
+                                        bottom: "4px",
+                                        borderRadius: "4px",
+                                        background: "#ddeeff",
+                                        border: "1px solid #8899bb",
+                                        fontSize: "10px",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        overflow: "hidden",
+                                        whiteSpace: "nowrap",
+                                        textOverflow: "ellipsis",
+                                    }}> 
+                                    Take {take.id}: {take.startSec}s → {take.endSec}s 
+                                </div>
+                                );
+                            })
+                        }
+                        
+                    </div>
                 {/* <p>.</p> */}
             </div>
                 
