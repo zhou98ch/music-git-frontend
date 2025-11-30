@@ -40,8 +40,9 @@ export const TrackView : React.FC<TrackViewProps > = ({trackId, date, takes, tot
                         
                             
                         {laneTakes.map((take) => {
-                            const leftPercent = (take.startSec / totalDurationSec) * 100;
-                            const widthPercent = ((take.endSec - take.startSec) / totalDurationSec) * 100;
+                            const safeTotalDuration = totalDurationSec > 0 ? totalDurationSec : 1;
+                            const leftPercent = (take.startSec / safeTotalDuration) * 100;
+                            const widthPercent = ((take.endSec - take.startSec) / safeTotalDuration) * 100;
 
                             return(
                                 <div className="take-block" key = {take.id}       
