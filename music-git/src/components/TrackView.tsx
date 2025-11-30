@@ -24,7 +24,7 @@ export const TrackView : React.FC<TrackViewProps > = ({trackId, date, takes, tot
         {/* <p>.</p> */}
         <div className="track-title" style={{background: " #fff0ceff"}}>Track on {trackId}</div>
         { Object.entries(lanes).map(([laneId, laneTakes])=> (
-            <div className="lane-row" key = {laneId} style={{background: " #dbceffff"}}>
+            <div className="lane-row" key = {laneId} style={{background: " #dbceffff", marginBottom: "12px" }}>
                 {/* <p>.</p> */}
                 <div className="lane-title" style={{background: " #c8c8c8ff"}}> Lane {laneId}: </div>
                     <div
