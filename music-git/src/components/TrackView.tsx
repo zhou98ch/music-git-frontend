@@ -13,7 +13,7 @@ type TrackViewProps  = {
 export const TrackView : React.FC<TrackViewProps > = ({trackId, date, takes, totalDurationSec}) => { 
 
     const lanes = groupTakesByLane(takes);
-
+    const [hoveredTake, setHoveredTake] = React.useState<Take | null>(null);
     return( <>
     {/* <div>Track Timeline for {trackId} on {date}, with {takes.length} takes
     {
@@ -43,9 +43,13 @@ export const TrackView : React.FC<TrackViewProps > = ({trackId, date, takes, tot
                             const safeTotalDuration = totalDurationSec > 0 ? totalDurationSec : 1;
                             const leftPercent = (take.startSec / safeTotalDuration) * 100;
                             const widthPercent = ((take.endSec - take.startSec) / safeTotalDuration) * 100;
+                            
+                            const isHovered = hoveredTake?.id === take.id;
 
                             return(
                                 <div className="take-block" key = {take.id}       
+                                    onMouseEnter={() => setHoveredTake(take)}
+                                    onMouseLeave={() => setHoveredTake(null)}
                                     style={{
                                         position: "absolute",
                                         left: `${leftPercent}%`,
@@ -53,8 +57,9 @@ export const TrackView : React.FC<TrackViewProps > = ({trackId, date, takes, tot
                                         top: "4px",
                                         bottom: "4px",
                                         borderRadius: "4px",
-                                        background: "#ddeeff",
-                                        border: "1px solid #8899bb",
+                                        background: isHovered ? "#bcd9ff" : "#ddeeff",
+                                        border: isHovered ? "2px solid #3366cc" : "1px solid #8899bb",
+                                        zIndex: isHovered ? 2 : 1,
                                         fontSize: "10px",
                                         display: "flex",
                                         alignItems: "center",
