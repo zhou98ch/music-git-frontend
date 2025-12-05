@@ -7,13 +7,15 @@ type TrackViewProps  = {
     date?: string;
     takes: Take[];
     totalDurationSec: number;
+    hoveredTake: Take | null;
+    onHoverTake: (take: Take | null) => void;
 }
 
 
-export const TrackView : React.FC<TrackViewProps > = ({trackId, date, takes, totalDurationSec}) => { 
+export const TrackView : React.FC<TrackViewProps > = ({trackId, date, takes, totalDurationSec, hoveredTake, onHoverTake,}) => { 
 
     const lanes = groupTakesByLane(takes);
-    const [hoveredTake, setHoveredTake] = React.useState<Take | null>(null);
+    // const [hoveredTake, setHoveredTake] = React.useState<Take | null>(null);
     return( <>
     {/* <div>Track Timeline for {trackId} on {date}, with {takes.length} takes
     {
@@ -44,12 +46,12 @@ export const TrackView : React.FC<TrackViewProps > = ({trackId, date, takes, tot
                             const leftPercent = (take.startSec / safeTotalDuration) * 100;
                             const widthPercent = ((take.endSec - take.startSec) / safeTotalDuration) * 100;
                             
-                            const isHovered = hoveredTake?.id === take.id;
+                             const isHovered = hoveredTake?.id === take.id;
 
                             return(
                                 <div className="take-block" key = {take.id}       
-                                    onMouseEnter={() => setHoveredTake(take)}
-                                    onMouseLeave={() => setHoveredTake(null)}
+                                      onMouseEnter={() => onHoverTake(take)}
+                                      onMouseLeave={() => onHoverTake(null)}
                                     style={{
                                         position: "absolute",
                                         left: `${leftPercent}%`,

@@ -8,7 +8,7 @@ type PieceTimelineProps  = {
 }
 
 export const PieceTimeline : React.FC<PieceTimelineProps > = ({totalDurationSec, tracks}) => {
-    const [hoveredTrack, setHoveredTrack] = React.useState<string | null>(null);
+    const [hoveredTake, setHoveredTake] = React.useState<Take | null>(null);
     return(
         <div>
             {
@@ -19,7 +19,8 @@ export const PieceTimeline : React.FC<PieceTimelineProps > = ({totalDurationSec,
                         date={trackId}
                         takes={takes}
                         totalDurationSec={totalDurationSec}
-                        // onHoverTake={setHoveredTake}   // TODO add hover handling later
+                        hoveredTake={hoveredTake}  
+                        onHoverTake={setHoveredTake}   // TODO add hover handling later
                     />
             ))
             }
