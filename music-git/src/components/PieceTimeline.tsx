@@ -22,7 +22,7 @@ export const PieceTimeline : React.FC<PieceTimelineProps > = ({totalDurationSec,
                         takes={takes}
                         totalDurationSec={totalDurationSec}
                         hoveredTake={hoveredTake}  
-                        onHoverTake={setHoveredTake}   // TODO add hover handling later
+                        onHoverTake={setHoveredTake}
                     />
             ))
             }

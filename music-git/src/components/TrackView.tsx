@@ -49,8 +49,8 @@ export const TrackView : React.FC<TrackViewProps > = ({trackId, date, takes, tot
                             const isHovered = hoveredTake?.id === take.id;
 
                             return(
-                                <div className="take-block" key = {take.id}       
-                                      onMouseEnter={() => onHoverTake(take)}
+                                <div  className="take-block" key = {take.id}       
+                                      onMouseEnter={() => onHoverTake(take)} // tell parent component<PieceTimeline> which take is hovered
                                       onMouseLeave={() => onHoverTake(null)}
                                     style={{
                                         position: "absolute",
