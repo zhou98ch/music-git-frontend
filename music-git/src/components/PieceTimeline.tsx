@@ -1,6 +1,7 @@
 import React from "react";
 import type { Take } from "../common/types";
 import { TrackView } from "./TrackView";
+import { PieceGlobalAxis } from "./PieceGlobalAxis";
 
 type PieceTimelineProps  = {
     totalDurationSec: number;
@@ -9,7 +10,8 @@ type PieceTimelineProps  = {
 
 export const PieceTimeline : React.FC<PieceTimelineProps > = ({totalDurationSec, tracks}) => {
     const [hoveredTake, setHoveredTake] = React.useState<Take | null>(null);
-    return(
+    return(<>
+        
         <div>
             {
                 Object.entries(tracks).map(([trackId, takes])=>(
@@ -26,6 +28,9 @@ export const PieceTimeline : React.FC<PieceTimelineProps > = ({totalDurationSec,
             }
             
         </div>
-
+        <div>
+            <PieceGlobalAxis totalDurationSec={totalDurationSec} hoveredTake={hoveredTake}/>
+        </div>
+    </>
     )
 }
