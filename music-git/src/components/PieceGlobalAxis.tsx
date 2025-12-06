@@ -1,12 +1,10 @@
 import React from "react";
 import type { Take } from "../common/types";
-import { groupTakesByLane } from "../utils/helpers";
 
 type PieceGlobalAxis  = {
     totalDurationSec: number;
     hoveredTake: Take | null;
 }
-
 
 export const PieceGlobalAxis : React.FC<PieceGlobalAxis > = ({totalDurationSec, hoveredTake}) => { 
     return(<>
