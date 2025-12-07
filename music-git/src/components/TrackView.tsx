@@ -9,10 +9,12 @@ type TrackViewProps  = {
     totalDurationSec: number;
     hoveredTake: Take | null;
     onHoverTake: (take: Take | null) => void;
+    selectedTake: Take | null;
+    onSelectTake: (take: Take | null) => void;
 }
 
 
-export const TrackView : React.FC<TrackViewProps > = ({trackId, date, takes, totalDurationSec, hoveredTake, onHoverTake,}) => { 
+export const TrackView : React.FC<TrackViewProps > = ({trackId, date, takes, totalDurationSec, hoveredTake, onHoverTake, selectedTake, onSelectTake}) => { 
 
     const lanes = groupTakesByLane(takes);
     // const [hoveredTake, setHoveredTake] = React.useState<Take | null>(null);
@@ -47,28 +49,40 @@ export const TrackView : React.FC<TrackViewProps > = ({trackId, date, takes, tot
                             const widthPercent = ((take.endSec - take.startSec) / safeTotalDuration) * 100;
                             
                             const isHovered = hoveredTake?.id === take.id;
+                            const isSelected = selectedTake?.id === take.id;
 
                             return(
                                 <div  className="take-block" key = {take.id}       
                                       onMouseEnter={() => onHoverTake(take)} // tell parent component<PieceTimeline> which take is hovered
                                       onMouseLeave={() => onHoverTake(null)}
-                                    style={{
-                                        position: "absolute",
-                                        left: `${leftPercent}%`,
-                                        width: `${widthPercent}%`,
-                                        top: "4px",
-                                        bottom: "4px",
-                                        borderRadius: "4px",
-                                        background: isHovered ? "#bcd9ff" : "#ddeeff",
-                                        border: isHovered ? "2px solid #3366cc" : "1px solid #8899bb",
-                                        zIndex: isHovered ? 2 : 1,
-                                        fontSize: "10px",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                        overflow: "hidden",
-                                        whiteSpace: "nowrap",
-                                        textOverflow: "ellipsis",
+                                      onClick={() => onSelectTake?.(take)}
+
+                                      style={{
+                                            position: "absolute",
+                                            left: `${leftPercent}%`,
+                                            width: `${widthPercent}%`,
+                                            top: "4px",
+                                            bottom: "4px",
+                                            borderRadius: "4px",
+                                            background: isSelected
+                                            ? "#99c2ff"
+                                            : isHovered
+                                            ? "#bcd9ff"
+                                            : "#ddeeff",
+                                            border: isSelected
+                                            ? "2px solid #0044cc"
+                                            : isHovered
+                                            ? "2px solid #3366cc"
+                                            : "1px solid #8899bb",
+                                            zIndex: isSelected ? 3 : isHovered ? 2 : 1,
+                                            fontSize: "10px",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                            overflow: "hidden",
+                                            whiteSpace: "nowrap",
+                                            textOverflow: "ellipsis",
+                                            cursor: "pointer",
                                     }}> 
                                     Take {take.id}: {take.startSec}s → {take.endSec}s 
                                 </div>
