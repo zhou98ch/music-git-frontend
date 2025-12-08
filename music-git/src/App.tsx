@@ -3,6 +3,7 @@
 import {mockTakes} from "./common/types";
 import { PieceTimeline } from "./components/PieceTimeline";
 import { TrackView } from "./components/TrackView";
+import { YouTubePlayer } from "./components/YoutubePlayer";
 import { groupTakesByTrack } from "./utils/helpers";
 function App() {
   const mockTotalDurationSec = 120; 
@@ -10,11 +11,17 @@ function App() {
   const tracks = groupTakesByTrack(mockTakes);
   console.log("Grouped Takes by Track:", tracks);
   return (
-    <div style={{ padding: 20, maxWidth: 800, margin: "0 auto" }}>
-      <h1>Recording Git - Full Song Timeline</h1>
-      <p>The song "{mockSongName}" lasts 0s → {mockTotalDurationSec}s，all Takes are arranged by time order。</p>
-      <PieceTimeline totalDurationSec = {mockTotalDurationSec} tracks={tracks}/>
-    </div>
+    <>
+        <div style={{ padding: 20 }}>
+          <YouTubePlayer videoId="dQw4w9WgXcQ" />
+        </div>
+        <div style={{ padding: 20, maxWidth: 800, margin: "0 auto" }}>
+          <h1>Recording Git - Full Song Timeline</h1>
+          <p>The song "{mockSongName}" lasts 0s → {mockTotalDurationSec}s，all Takes are arranged by time order。</p>
+          <PieceTimeline totalDurationSec = {mockTotalDurationSec} tracks={tracks}/>
+        </div>
+    </>
+
   );
 }
 
