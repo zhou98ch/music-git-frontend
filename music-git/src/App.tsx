@@ -1,6 +1,7 @@
 // src/App.tsx
 
 import {mockTakes} from "./common/types";
+import { BilibiliPlayer } from "./components/BilibiliPlayer";
 import { PieceTimeline } from "./components/PieceTimeline";
 import { TrackView } from "./components/TrackView";
 import { YouTubePlayer } from "./components/YoutubePlayer";
@@ -12,6 +13,9 @@ function App() {
   console.log("Grouped Takes by Track:", tracks);
   return (
     <>
+        <div style={{ padding: 20 }}>
+          <BilibiliPlayer bvid="BV1Xx411c7mD" />
+        </div>
         <div style={{ padding: 20 }}>
           <YouTubePlayer videoId="dQw4w9WgXcQ" />
         </div>
