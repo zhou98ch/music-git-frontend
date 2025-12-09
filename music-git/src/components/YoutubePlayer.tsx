@@ -5,7 +5,7 @@ type YouTubePlayerProps = {
 };
 
 export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ videoId }) => {
-    videoId = "ujpywovQqeU?si=DEIrIQ2svnP-g42c";
+
   const embedUrl = `https://www.youtube.com/embed/${videoId}`;
 
   return (

@@ -3,8 +3,7 @@
 import {mockTakes} from "./common/types";
 import { BilibiliPlayer } from "./components/BilibiliPlayer";
 import { PieceTimeline } from "./components/PieceTimeline";
-import { TrackView } from "./components/TrackView";
-import { YouTubePlayer } from "./components/YoutubePlayer";
+import { YouTubePlayerWithInput } from "./components/YoutubePlayerWithInput";
 import { groupTakesByTrack } from "./utils/helpers";
 function App() {
   const mockTotalDurationSec = 120; 
@@ -17,7 +16,7 @@ function App() {
           <BilibiliPlayer bvid="BV1Xx411c7mD" />
         </div>
         <div style={{ padding: 20 }}>
-          <YouTubePlayer videoId="dQw4w9WgXcQ" />
+          <YouTubePlayerWithInput />
         </div>
         <div style={{ padding: 20, maxWidth: 800, margin: "0 auto" }}>
           <h1>Recording Git - Full Song Timeline</h1>
