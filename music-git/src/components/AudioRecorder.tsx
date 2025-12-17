@@ -8,8 +8,9 @@ export const AudioRecorder: React.FC = () => {
   const mediaRecorderRef = React.useRef<MediaRecorder | null>(null);
   const streamRef = React.useRef<MediaStream | null>(null);
   const chunksRef = React.useRef<BlobPart[]>([]);
+  const stopResolveRef = React.useRef<((result: {blob:Blob; url: string}) => void) | null>(null);
 
-const startRecording = async () => {
+  const startRecording = async () => {
     // 1) reset UI errors
     setError(null);
 
@@ -50,9 +51,11 @@ const startRecording = async () => {
 
         // 8) build final blob on stop
         recorder.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: recorder.mimeType });
-        const url = URL.createObjectURL(blob);
-        setAudioUrl(url);
+          const blob = new Blob(chunksRef.current, { type: recorder.mimeType });
+          const url = URL.createObjectURL(blob);
+          setAudioUrl(url);
+          stopResolveRef.current?.({blob, url});
+          stopResolveRef.current = null;
         };
 
         // 9) start recording
@@ -61,31 +64,33 @@ const startRecording = async () => {
     } catch (err) {
         setError("Microphone permission denied or not available.");
     }
-};
+  };
     const stopRecording = () => {
-        // 1) stop recorder (will trigger recorder.onstop asynchronously)
         const recorder = mediaRecorderRef.current;
-        if (recorder && recorder.state !== "inactive") {
+        if (!recorder || recorder.state === "inactive") {
+          return Promise.reject(new Error("Not recording"));
+        }
+
+        return new Promise<{blob:Blob; url:string}>((resolve) => {
+            stopResolveRef.current = resolve;
             recorder.stop();
-        }
-
-        // 2) update UI state immediately
-        setIsRecording(false);
-
-        // 3) release microphone (VERY IMPORTANT)
-        if (streamRef.current) {
-            streamRef.current.getTracks().forEach(track => track.stop());
-            streamRef.current = null;
-        }
-
-        // 4) clear recorder ref (optional but clean)
-        mediaRecorderRef.current = null;
+        })
     };
 
   return (
     <div style={{ border: "1px solid #ccc", borderRadius: 8, padding: 12 }}>
       <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-        <button onClick={isRecording ? stopRecording : startRecording}>
+        <button onClick={
+          async () => {
+            if(isRecording) {
+              const res = await stopRecording();
+              console.log("Recording stopped, blob:", res.blob.size, res.url);
+            }
+            else{
+              await startRecording();
+            }
+          }
+        }>
           {isRecording ? "Stop" : "Record"}
         </button>
 
