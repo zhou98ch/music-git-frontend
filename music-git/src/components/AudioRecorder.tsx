@@ -1,4 +1,5 @@
 import React from "react";
+import { YouTubePlayerWithInput } from "./YoutubePlayerWithInput";
 
 export const AudioRecorder: React.FC = () => {
   const [isRecording, setIsRecording] = React.useState(false);
@@ -11,6 +12,7 @@ export const AudioRecorder: React.FC = () => {
   const stopResolveRef = React.useRef<((result: {blob:Blob; url: string}) => void) | null>(null);
 
   const startRecording = async () => {
+    const startSec = ytPlayer.getCurrentTime();
     // 1) reset UI errors
     setError(null);
 
@@ -85,6 +87,7 @@ export const AudioRecorder: React.FC = () => {
             if(isRecording) {
               const res = await stopRecording();
               console.log("Recording stopped, blob:", res.blob.size, res.url);
+              const endSec = YouTubePlayerWithInput.getCurrentTime();
             }
             else{
               await startRecording();
