@@ -1,9 +1,11 @@
 import React from "react";
 import { YouTubePlayer } from "./YoutubePlayer.tsx";
+import type { TimeBase } from "../common/TimeBase.ts";
 
 export const YouTubePlayerWithInput: React.FC = () => {
   const [url, setUrl] = React.useState("");
   const [videoId, setVideoId] = React.useState<string | null>(null);
+  const timeBaseRef = React.useRef<TimeBase | null>(null);
 
   // extract a unique identifier from YouTube URL: v=xxx
   function extractVideoId(input: string): string | null {
@@ -45,7 +47,11 @@ export const YouTubePlayerWithInput: React.FC = () => {
       </div>
 
       {videoId ? (
-        <YouTubePlayer videoId={videoId} />
+        <YouTubePlayer videoId={videoId} 
+        onTimeBaseReady={(tb) => {
+          timeBaseRef.current = tb;
+          console.log("timeBase ready, now:", tb.nowSec());
+        }}/>
       ) : (
         <div style={{ fontSize: 12, color: "#666" }}>
           Please enter a valid YouTube Link
@@ -54,3 +60,6 @@ export const YouTubePlayerWithInput: React.FC = () => {
     </div>
   );
 };
+  export function getCurrentTime(): number {
+    return 0;
+  }
