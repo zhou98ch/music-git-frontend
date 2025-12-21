@@ -60,6 +60,3 @@ export const YouTubePlayerWithInput: React.FC = () => {
     </div>
   );
 };
-  export function getCurrentTime(): number {
-    return 0;
-  }
