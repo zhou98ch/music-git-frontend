@@ -2,6 +2,8 @@ import React from "react";
 import { YouTubePlayer } from "./YoutubePlayer.tsx";
 import type { TimeBase } from "../common/TimeBase.ts";
 import { useAudioRecorder } from "../hooks/useAudioRecorder";
+import type { AudioMode } from "../hooks/useAudioRecorder";
+
 type TakeDraft ={
   id: string;
   startSec: number;
@@ -10,12 +12,15 @@ type TakeDraft ={
   audioUrl: string;
 }
 export const YouTubePlayerWithInput: React.FC = () => {
-  const { isRecording, startRecording, stopRecording, error } = useAudioRecorder();
+
   const [url, setUrl] = React.useState("");
   const [videoId, setVideoId] = React.useState<string | null>(null);
   const timeBaseRef = React.useRef<TimeBase | null>(null);
   const startSecRef = React.useRef<number|null>(null);
   const [takes, setTakes] = React.useState<TakeDraft[]>([]);
+  const [anchorSec, setAnchorSec] = React.useState(0);
+  const [audioMode, setAudioMode] = React.useState<AudioMode>("instrument");
+  const { isRecording, startRecording, stopRecording, error } = useAudioRecorder(audioMode);
 
   // extract a unique identifier from YouTube URL: v=xxx
   function extractVideoId(input: string): string | null {
@@ -69,7 +74,42 @@ export const YouTubePlayerWithInput: React.FC = () => {
       )}
       {/* ////////////////////////recoring UI////////////////////// */}
       {videoId && (
+        
         <div className="recording-area">
+          <div style={{ marginTop: 12, display: "flex", gap: 12, alignItems: "center" }}>
+            <span style={{ fontSize: 12, color: "#555" }}>Mic mode:</span>
+
+            <label style={{ display: "inline-flex", gap: 6, alignItems: "center", fontSize: 12 }}>
+              <input
+                type="radio"
+                name="audioMode"
+                value="instrument"
+                checked={audioMode === "instrument"}
+                onChange={() => setAudioMode("instrument")}
+                disabled={isRecording}
+              />
+              Instrument
+            </label>
+
+            <label style={{ display: "inline-flex", gap: 6, alignItems: "center", fontSize: 12 }}>
+              <input
+                type="radio"
+                name="audioMode"
+                value="voice"
+                checked={audioMode === "voice"}
+                onChange={() => setAudioMode("voice")}
+                disabled={isRecording}
+              />
+              Voice / Call
+            </label>
+
+            {isRecording && (
+              <span style={{ fontSize: 12, color: "#999" }}>
+                (stop recording to change)
+              </span>
+            )}
+          </div>
+
           <button onClick={async (e)=>{
             const tb = timeBaseRef.current;
             if (!tb) {
@@ -77,14 +117,17 @@ export const YouTubePlayerWithInput: React.FC = () => {
               return;
             }
             if(!isRecording) {
-              const startSec = tb.nowSec();
+              const startSec = anchorSec;
               startSecRef.current = startSec;
+              tb.seekTo?.(startSec);
+              tb.play?.();
               await startRecording();
               console.log("startSec:", startSec);
             }
             else {
               const endSec = tb.nowSec();
               const audio = await stopRecording();
+              tb.pause?.()
               const startSec = startSecRef.current ?? endSec;
 
               const take: TakeDraft = {
@@ -121,6 +164,18 @@ export const YouTubePlayerWithInput: React.FC = () => {
 
         </div>
       )}
+      <label style={{ display: "block", marginTop: 12 }}>
+        Record from (sec):
+        <input
+          type="number"
+          value={anchorSec}
+          min={0}
+          step={0.1}
+          onChange={(e) => setAnchorSec(Number(e.target.value))}
+          style={{ marginLeft: 8, width: 120 }}
+        />
+      </label>
+
       {/* //////////////////////////////////////////////////////////// */}
     </div>
   );

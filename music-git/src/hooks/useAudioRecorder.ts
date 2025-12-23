@@ -1,6 +1,6 @@
 import React from "react";
-
-export function useAudioRecorder() {
+export type AudioMode = "instrument" | "voice";
+export function useAudioRecorder(mode: AudioMode = "instrument") {
     const [isRecording, setIsRecording] = React.useState(false);
     const [audioUrl, setAudioUrl] = React.useState<string | null>(null);
     const [error, setError] = React.useState<string | null>(null);
@@ -37,7 +37,35 @@ export function useAudioRecorder() {
 
         try {
             // 5) request microphone
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            // const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            // IMPORTANT: Browser defaults are optimized for *voice calls*.
+            // On Windows/Edge (and many setups), enabling these can cause the browser to:
+            // - treat background music as "echo/noise"
+            // - aggressively suppress parts of instrument sound when YouTube audio is playing
+            //
+            // For instrument practice recording, we prefer capturing a more "raw" mic signal:
+            // - echoCancellation: disable acoustic echo cancellation (AEC)
+            // - noiseSuppression: disable noise reduction that can mistakenly remove instrument tones
+            // - autoGainControl: disable automatic level riding that pumps/ducks the instrument
+            const audioConstraints: MediaTrackConstraints =
+                mode === "instrument"
+                ? {
+                    echoCancellation: false,
+                    noiseSuppression: false,
+                    autoGainControl: false,
+                    }
+                : {
+                    // Voice/call mode: better intelligibility for speech,
+                    // but may distort/suppress instruments when background audio exists.
+                    echoCancellation: true,
+                    noiseSuppression: true,
+                    autoGainControl: true,
+                    };
+
+            const stream = await navigator.mediaDevices.getUserMedia({
+                audio: audioConstraints,
+            });
+
             streamRef.current = stream;
 
             // 6) create recorder
