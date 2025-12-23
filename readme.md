@@ -1,3 +1,4 @@
+**The goal is to make music practice easier to review, and progress easier to notice.**
 # music-git
 
 music-git is an experimental tool for recording and reviewing instrument practice,  **inspired by Git**.
