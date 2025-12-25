@@ -12,7 +12,8 @@ type TakeDraft ={
   audioUrl: string;
 }
 export const YouTubePlayerWithInput: React.FC = () => {
-
+  const [audioInputs, setAudioInputs] = React.useState<MediaDeviceInfo[]>([]);
+  const [selectedDeviceId, setSelectedDeviceId] = React.useState<string>("default");
   const [url, setUrl] = React.useState("");
   const [videoId, setVideoId] = React.useState<string | null>(null);
   const timeBaseRef = React.useRef<TimeBase | null>(null);
@@ -20,7 +21,13 @@ export const YouTubePlayerWithInput: React.FC = () => {
   const [takes, setTakes] = React.useState<TakeDraft[]>([]);
   const [anchorSec, setAnchorSec] = React.useState(0);
   const [audioMode, setAudioMode] = React.useState<AudioMode>("instrument");
-  const { isRecording, startRecording, stopRecording, error } = useAudioRecorder(audioMode);
+  const { isRecording, startRecording, stopRecording, error } = useAudioRecorder({mode: audioMode, deviceId: selectedDeviceId});
+
+  const refreshAudioInputs = async () => {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const inputs = devices.filter((d) => d.kind === "audioinput");
+    setAudioInputs(inputs);
+  };
 
   // extract a unique identifier from YouTube URL: v=xxx
   function extractVideoId(input: string): string | null {
@@ -47,6 +54,9 @@ export const YouTubePlayerWithInput: React.FC = () => {
     const id = extractVideoId(url.trim());
     setVideoId(id);
   };
+  React.useEffect(() => {
+    refreshAudioInputs();
+  }, []);
 
   return (
     <div>
@@ -76,6 +86,47 @@ export const YouTubePlayerWithInput: React.FC = () => {
       {videoId && (
         
         <div className="recording-area">
+          {/* ////////////////////////button for Grant mic permission / Refresh devices UI////////////////////// */}
+          <button
+            onClick={async () => {
+              try {
+                const s = await navigator.mediaDevices.getUserMedia({ audio: true });
+                // turn off immediately, in case of taking the microphone
+                s.getTracks().forEach((t) => t.stop());
+                await refreshAudioInputs();
+              } catch (e) {
+                console.warn("Mic permission denied", e);
+              }
+            }}
+          >
+            Grant mic permission / Refresh devices
+          </button>
+            {/* ////////////////////////////////////////////////////////////////////////////////////////////////////// */}
+            {/* ////////////////////////dropdown UI for difference recording devices///////////////////// */}
+            <div style={{ marginTop: 12 }}>
+              <label style={{ fontSize: 12, color: "#555" }}>
+                Input device:
+                <select
+                  value={selectedDeviceId}
+                  onChange={(e) => setSelectedDeviceId(e.target.value)}
+                  disabled={isRecording}
+                  style={{ marginLeft: 8, maxWidth: 320 }}
+                >
+                  <option value="default">Default</option>
+                  {audioInputs.map((d) => (
+                    <option key={d.deviceId} value={d.deviceId}>
+                      {d.label || `Audio input (${d.deviceId.slice(0, 6)}...)`}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              {isRecording && (
+                <div style={{ fontSize: 12, color: "#999", marginTop: 6 }}>
+                  Stop recording to change input device.
+                </div>
+              )}
+            </div>
+            {/* /////////////////////////////////////////////////////////////////////// */}
           <div style={{ marginTop: 12, display: "flex", gap: 12, alignItems: "center" }}>
             <span style={{ fontSize: 12, color: "#555" }}>Mic mode:</span>
 

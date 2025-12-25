@@ -1,6 +1,11 @@
 import React from "react";
 export type AudioMode = "instrument" | "voice";
-export function useAudioRecorder(mode: AudioMode = "instrument") {
+export function useAudioRecorder(options?: {
+  mode?: AudioMode;
+  deviceId?: string; // "default" or a real deviceId
+}) {
+    const mode = options?.mode ?? "instrument";
+    const deviceId = options?.deviceId ?? "default";
     const [isRecording, setIsRecording] = React.useState(false);
     const [audioUrl, setAudioUrl] = React.useState<string | null>(null);
     const [error, setError] = React.useState<string | null>(null);
@@ -63,7 +68,10 @@ export function useAudioRecorder(mode: AudioMode = "instrument") {
                     };
 
             const stream = await navigator.mediaDevices.getUserMedia({
-                audio: audioConstraints,
+                  audio: {
+                    ...audioConstraints,
+                    ...(deviceId && deviceId !== "default" ? { deviceId: { exact: deviceId } } : {}),
+                },
             });
 
             streamRef.current = stream;
