@@ -3,6 +3,8 @@ import { YouTubePlayer } from "./YoutubePlayer.tsx";
 import type { TimeBase } from "../common/TimeBase.ts";
 import { useAudioRecorder } from "../hooks/useAudioRecorder";
 import type { AudioMode } from "../hooks/useAudioRecorder";
+import { useMicLevel } from "../hooks/useMicLevel";
+
 
 type TakeDraft ={
   id: string;
@@ -22,7 +24,8 @@ export const YouTubePlayerWithInput: React.FC = () => {
   const [anchorSec, setAnchorSec] = React.useState(0);
   const [audioMode, setAudioMode] = React.useState<AudioMode>("instrument");
   const { isRecording, startRecording, stopRecording, error } = useAudioRecorder({mode: audioMode, deviceId: selectedDeviceId});
-
+  const { level, isMonitoring, error: levelError, startMonitoring, stopMonitoring } =
+    useMicLevel({ mode: audioMode, deviceId: selectedDeviceId });
   const refreshAudioInputs = async () => {
     const devices = await navigator.mediaDevices.enumerateDevices();
     const inputs = devices.filter((d) => d.kind === "audioinput");
@@ -201,20 +204,96 @@ export const YouTubePlayerWithInput: React.FC = () => {
               {error}
             </div>
           )}
-
-          <div style={{ marginTop: 12 }}>
-            {takes.map((t) => (
-              <div key={t.id} style={{ border: "1px solid #ddd", borderRadius: 8, padding: 8, marginBottom: 8 }}>
-                <div style={{ fontSize: 12, color: "#555" }}>
-                  {t.startSec.toFixed(2)}s → {t.endSec.toFixed(2)}s
-                </div>
-                <audio controls src={t.audioUrl} />
+        {/* ///////////////list of takes(temporary)////////////////////////// */}
+        <div style={{ marginTop: 12 }}>
+          {takes.map((t) => (
+            <div
+              key={t.id}
+              style={{
+                border: "1px solid #ddd",
+                borderRadius: 8,
+                padding: 8,
+                marginBottom: 8,
+              }}
+            >
+              <div
+                role="button"
+                style={{
+                  fontSize: 12,
+                  color: "#555",
+                  cursor: "pointer",
+                }}
+                onClick={() => {
+                  const tb = timeBaseRef.current;
+                  if (!tb || !tb.isReady()) {
+                    alert("wait for YouTube to be ready");
+                    return;
+                  }
+                  tb.seekTo(t.startSec);
+                  tb.play();
+                }}
+              >
+                {t.startSec.toFixed(2)}s → {t.endSec.toFixed(2)}s
               </div>
-            ))}
-          </div>
 
+              <audio controls src={t.audioUrl} />
+            </div>
+          ))}
+        </div>
+
+        {/* /////////////////////////////////////////// */}
         </div>
       )}
+      {/* //////////// frequency display UI/////////////////// */}
+      <div style={{ marginTop: 12, padding: 8, border: "1px solid #ddd", borderRadius: 8 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <button onClick={isMonitoring ? stopMonitoring : startMonitoring} disabled={isRecording}>
+          {isMonitoring ? "Stop meter" : "Start meter"}
+        </button>
+
+        <div style={{ fontSize: 12, color: "#555" }}>
+          Input level
+        </div>
+      </div>
+
+      <div
+        style={{
+          marginTop: 8,
+          height: 10,
+          width: 260,
+          borderRadius: 999,
+          border: "1px solid #ccc",
+          overflow: "hidden",
+        }}
+      >
+        <div
+          style={{
+            height: "100%",
+            width: `${Math.round(level * 100)}%`,
+            background: "linear-gradient(90deg, #4ade80, #fbbf24, #ef4444)",
+            transition: "width 60ms linear",
+          }}
+        />
+      </div>
+
+      <div style={{ marginTop: 6, fontSize: 12, color: "#666" }}>
+        {Math.round(level * 100)}%
+      </div>
+
+      {levelError && (
+        <div style={{ marginTop: 8, color: "crimson", fontSize: 12 }}>
+          {levelError}
+        </div>
+      )}
+
+      {isRecording && (
+        <div style={{ marginTop: 6, fontSize: 12, color: "#999" }}>
+          Stop recording to use the meter.
+        </div>
+      )}
+    </div>
+
+      {/* /////////////////////////////////////////////////////// */}
       <label style={{ display: "block", marginTop: 12 }}>
         Record from (sec):
         <input
