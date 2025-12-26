@@ -18,15 +18,15 @@ export type TimeBase = {
   nowSec: () => number;
 
   /** Optional playback controls if the underlying provider supports them. */
-  play?: () => void;
-  pause?: () => void;
+  play: () => void;
+  pause: () => void;
 
   /**
    * Optional seek control.
    * Implementations should seek the provider to the given time in seconds.
    */
-  seekTo?: (sec: number) => void;
+  seekTo: (sec: number) => void;
 
   /** Optional readiness check (e.g., YouTube player is initialized). */
-  isReady?: () => boolean;
+  isReady: () => boolean;
 };
