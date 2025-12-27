@@ -20,8 +20,13 @@ export type Take = {
   description: string;
   evaluation: number;
 };
-
-
+export type TakeDraft ={
+  id: string;
+  startSec: number;
+  endSec: number;
+  recordedTime: number;
+  audioUrl: string;
+}
 export const mockTakes: Take[] = [
   // -------------------------
   // Track: 2025-11-24

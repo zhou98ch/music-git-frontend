@@ -4,15 +4,8 @@ import type { TimeBase } from "../common/TimeBase.ts";
 import { useAudioRecorder } from "../hooks/useAudioRecorder";
 import type { AudioMode } from "../hooks/useAudioRecorder";
 import { useMicLevel } from "../hooks/useMicLevel";
+import type { TakeDraft } from "../common/types";
 
-
-type TakeDraft ={
-  id: string;
-  startSec: number;
-  endSec: number;
-  recordedTime: number;
-  audioUrl: string;
-}
 export const YouTubePlayerWithInput: React.FC = () => {
   const [audioInputs, setAudioInputs] = React.useState<MediaDeviceInfo[]>([]);
   const [selectedDeviceId, setSelectedDeviceId] = React.useState<string>("default");
