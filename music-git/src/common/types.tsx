@@ -17,8 +17,9 @@ export type Take = {
   endSec: number; //ending time point of this recording take in this song
   recordedAt: number; //at which order number is this take recorded among all takes in this lane
   recordedTime: number;
-  description: string;
-  evaluation: number;
+  description?: string;
+  evaluation?: number;
+  audioUrl: string;
 };
 export type TakeDraft ={
   id: string;
@@ -41,6 +42,7 @@ export const mockTakes: Take[] = [
     recordedTime: 1732443000000, // timestamp
     description: "First take of the day",
     evaluation: 3,
+    audioUrl:"xxx"
   },
   {
     id: "t2",
@@ -52,6 +54,7 @@ export const mockTakes: Take[] = [
     recordedTime: 1732443300000,
     description: "Second take",
     evaluation: 4,
+    audioUrl:"xxx"
   },
   {
     id: "t3",
@@ -63,6 +66,7 @@ export const mockTakes: Take[] = [
     recordedTime: 1732443600000,
     description: "Try another version on a new lane",
     evaluation: 2,
+    audioUrl:"xxx"
   },
 
   // -------------------------
@@ -78,6 +82,7 @@ export const mockTakes: Take[] = [
     recordedTime: 1732529400000,
     description: "Started late section",
     evaluation: 5,
+    audioUrl:"xxx"
   },
   {
     id: "t5",
@@ -89,6 +94,7 @@ export const mockTakes: Take[] = [
     recordedTime: 1732529700000,
     description: "Second try on same lane",
     evaluation: 3,
+    audioUrl:"xxx"
   },
   {
     id: "t6",
@@ -100,5 +106,6 @@ export const mockTakes: Take[] = [
     recordedTime: 1732530000000,
     description: "Full section attempt",
     evaluation: 4,
+    audioUrl:"xxx"
   },
 ];
