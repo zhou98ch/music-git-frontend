@@ -1,4 +1,4 @@
-import type { Take } from "../common/types";
+import type { Take, TakeDraft } from "../common/types";
 /**
 * Group the passed-in takes array by trackId, and sort the takes within each group in descending order by the recordedAt field.
 * @param takes The list of takes to be grouped.
@@ -37,3 +37,36 @@ export function groupTakesByLane(allTakesInTrack: Take[]):Record<string, Take[]>
   }
   return groupedTakesByLane;
 }
+export function getTodayTrackId(): string {
+  const d = new Date()
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+export function makeTakeFromDraft(args: {
+  draft: TakeDraft;
+  trackId: string;
+  laneId: string;
+  existingTakes: Take[];
+}): Take {
+  const { draft, trackId, laneId, existingTakes } = args;
+
+  const recordedAt =
+    existingTakes.filter((t) => t.trackId === trackId && t.laneId === laneId).length + 1;
+
+  return {
+    id: draft.id,
+    trackId,
+    laneId,
+    startSec: draft.startSec,
+    endSec: draft.endSec,
+    recordedAt,
+    recordedTime: draft.recordedTime,
+    description: "",
+    evaluation: 0,
+    audioUrl: draft.audioUrl,
+  };
+}
+

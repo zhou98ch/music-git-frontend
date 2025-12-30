@@ -4,16 +4,23 @@ import type { TimeBase } from "../common/TimeBase.ts";
 import { useAudioRecorder } from "../hooks/useAudioRecorder";
 import type { AudioMode } from "../hooks/useAudioRecorder";
 import { useMicLevel } from "../hooks/useMicLevel";
-import type { TakeDraft } from "../common/types";
-
+import type { Take, TakeDraft } from "../common/types";
+import { PieceTimeline } from "./PieceTimeline.tsx";
+import { getTodayTrackId, groupTakesByTrack, makeTakeFromDraft } from "../utils/helpers.tsx";
+import {mockTakes} from "../common/types";
 export const YouTubePlayerWithInput: React.FC = () => {
+  const mockTotalDurationSec = 120; 
+  const mockSongName = "Demo Song";
+
+  const [selectedLaneId, setSelectedLaneId] = React.useState("lane-1");
   const [audioInputs, setAudioInputs] = React.useState<MediaDeviceInfo[]>([]);
   const [selectedDeviceId, setSelectedDeviceId] = React.useState<string>("default");
   const [url, setUrl] = React.useState("");
   const [videoId, setVideoId] = React.useState<string | null>(null);
   const timeBaseRef = React.useRef<TimeBase | null>(null);
   const startSecRef = React.useRef<number|null>(null);
-  const [takes, setTakes] = React.useState<TakeDraft[]>([]);
+  const [takes, setTakes] = React.useState<Take[]>([]);
+  const tracks = groupTakesByTrack(takes);
   const [anchorSec, setAnchorSec] = React.useState(0);
   const [audioMode, setAudioMode] = React.useState<AudioMode>("instrument");
   const { isRecording, startRecording, stopRecording, error } = useAudioRecorder({mode: audioMode, deviceId: selectedDeviceId});
@@ -166,28 +173,35 @@ export const YouTubePlayerWithInput: React.FC = () => {
             if(!isRecording) {
               const startSec = anchorSec;
               startSecRef.current = startSec;
-              tb.seekTo?.(startSec);
-              tb.play?.();
+              tb.seekTo(startSec);
+              tb.play();
               await startRecording();
               console.log("startSec:", startSec);
             }
             else {
               const endSec = tb.nowSec();
               const audio = await stopRecording();
-              tb.pause?.()
+              tb.pause()
               const startSec = startSecRef.current ?? endSec;
 
-              const take: TakeDraft = {
+              const takeDraft: TakeDraft = {
                 id: crypto.randomUUID(),
                 startSec,
                 endSec,
                 recordedTime: Date.now(),
-                audioUrl: audio.url,
+                audioUrl: audio.url
               };
-              setTakes((prev) => [...prev, take]);
-              console.log("TAKE:", take);
-            }
-            
+              setTakes((prev) => {
+                const newTake = makeTakeFromDraft({
+                  draft: takeDraft,
+                  trackId: getTodayTrackId(),
+                  laneId: selectedLaneId ?? "lane-1",
+                  existingTakes: prev,
+                });
+                console.log("TAKE:", newTake);
+                return [...prev, newTake];
+              });
+            } 
           }
           }>
             {!isRecording ? "start":"stop"}
@@ -197,8 +211,8 @@ export const YouTubePlayerWithInput: React.FC = () => {
               {error}
             </div>
           )}
-        {/* ///////////////list of takes(temporary)////////////////////////// */}
-        <div style={{ marginTop: 12 }}>
+        {/* ///////////////list of takes(temporary) for debugging////////////////////////// */}
+        {/* <div style={{ marginTop: 12 }}>
           {takes.map((t) => (
             <div
               key={t.id}
@@ -232,7 +246,7 @@ export const YouTubePlayerWithInput: React.FC = () => {
               <audio controls src={t.audioUrl} />
             </div>
           ))}
-        </div>
+        </div> */}
 
         {/* /////////////////////////////////////////// */}
         </div>
@@ -300,6 +314,23 @@ export const YouTubePlayerWithInput: React.FC = () => {
       </label>
 
       {/* //////////////////////////////////////////////////////////// */}
+      <PieceTimeline totalDurationSec = {mockTotalDurationSec} tracks={tracks} timeBaseRef={timeBaseRef}/>
+      {/* ///////// lane selection TODO ///////////////// */}
+      <label style={{ fontSize: 12, color: "#555", marginRight: 8 }}>
+        Lane:
+      </label>
+      <select
+        value={selectedLaneId}
+        disabled={isRecording}
+        onChange={(e) => setSelectedLaneId(e.target.value)}
+      >
+        <option value="lane-1">lane-1</option>
+        <option value="lane-2">lane-2</option>
+        <option value="lane-3">lane-3</option>
+        {/* TODO ADJUST TO MORE LANES*/}
+      </select>
+
+      {/* /////////////////////////////////////////////////// */}
     </div>
   );
 };
