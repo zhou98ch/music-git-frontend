@@ -11,7 +11,7 @@ export type Lane = {
 };
 export type Take = {
   id: string;
-  trackId: string;
+  trackId: string; // default: trackId = YYYY-MM-DD
   laneId: string;
   startSec: number; //starting time point of this recording take in this song
   endSec: number; //ending time point of this recording take in this song
