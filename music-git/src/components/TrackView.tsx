@@ -64,6 +64,7 @@ export const TrackView : React.FC<TrackViewProps > = ({trackId, date, takes, tot
                                             top: "4px",
                                             bottom: "4px",
                                             borderRadius: "4px",
+                                            opacity: !isHovered ? 0.7 : 1,
                                             background: isSelected
                                             ? "#99c2ff"
                                             : isHovered
