@@ -86,6 +86,21 @@ return (
                 if (!tb) return;
                 tb.pause();
             }}
+
+            onSeeked={() => {
+                const tb = timeBaseRef.current;
+                const audio = takeAudioRef.current;
+                const take = selectedTake; // activeTake
+                if (!tb || !audio || !take) return;
+
+                const ready = tb.isReady ? tb.isReady() : true;
+                if (!ready) return;
+
+                const target = take.startSec + audio.currentTime;
+                tb.seekTo(target);
+
+                if (!audio.paused) tb.play();
+            }}
         />
         </>
         );
