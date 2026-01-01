@@ -97,6 +97,7 @@ return (
                 if (!ready) return;
 
                 const target = take.startSec + audio.currentTime;
+                if (!Number.isFinite(target)) return;
                 tb.seekTo(target);
 
                 if (!audio.paused) tb.play();
