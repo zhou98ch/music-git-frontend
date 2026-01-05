@@ -12,6 +12,7 @@ type PieceTimelineProps  = {
 export const PieceTimeline : React.FC<PieceTimelineProps > = ({totalDurationSec, tracks, timeBaseRef}) => {
     const [hoveredTake, setHoveredTake] = React.useState<Take | null>(null);
     const [selectedTake, setSelectedTake] = React.useState<Take | null>(null);
+    const [selectedTakeId, setselectedTakeId] = React.useState<string | null>(null);
     const takeAudioRef = React.useRef<HTMLAudioElement | null>(null);
     const suppressAudioEventsRef = React.useRef(false);
     // const [activeTake, setActiveTake] = React.useState<Take | null>(null);
@@ -39,7 +40,10 @@ export const PieceTimeline : React.FC<PieceTimelineProps > = ({totalDurationSec,
 
         suppressAudioEventsRef.current = true;
         try {
-            if (audio.src !== t.audioUrl) audio.src = t.audioUrl;
+            if (selectedTakeId !== t.id) {
+                audio.src = t.audioUrl;
+                setselectedTakeId(t.id);
+            }
             audio.currentTime = 0;
             void audio.play();
         } finally {
