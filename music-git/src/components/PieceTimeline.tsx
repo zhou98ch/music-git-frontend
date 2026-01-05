@@ -13,6 +13,7 @@ export const PieceTimeline : React.FC<PieceTimelineProps > = ({totalDurationSec,
     const [hoveredTake, setHoveredTake] = React.useState<Take | null>(null);
     const [selectedTake, setSelectedTake] = React.useState<Take | null>(null);
     const takeAudioRef = React.useRef<HTMLAudioElement | null>(null);
+    const suppressAudioEventsRef = React.useRef(false);
     // const [activeTake, setActiveTake] = React.useState<Take | null>(null);
     const playTake = React.useCallback((t: Take | null) => {
         if (!t) return;
@@ -32,11 +33,22 @@ export const PieceTimeline : React.FC<PieceTimelineProps > = ({totalDurationSec,
         tb.play();
 
         // Take audio
+        // prevent reverse triggering from <audio>'s onPlay/onSeek
         const audio = takeAudioRef.current;
-        if(!audio) return;
-        if(audio.src != t.audioUrl) audio.src = t.audioUrl;
-        audio.currentTime = 0;
-        void audio.play();
+        if (!audio) return;
+
+        suppressAudioEventsRef.current = true;
+        try {
+            if (audio.src !== t.audioUrl) audio.src = t.audioUrl;
+            audio.currentTime = 0;
+            void audio.play();
+        } finally {
+            // Give the browser a moment to process play/seek event queue
+            // This setTimeout is very short, just enough to avoid most recursive triggers
+            setTimeout(() => {
+            suppressAudioEventsRef.current = false;
+            }, 0);
+        }
     }, [timeBaseRef]);
 
 return (
@@ -75,6 +87,7 @@ return (
         </div>
         <audio ref={takeAudioRef} controls 
             onPlay={() => {
+                if (suppressAudioEventsRef.current) return;
                 const tb = timeBaseRef.current;
                 if (!tb) return;
                 const ready = tb.isReady ? tb.isReady() : true;
@@ -82,12 +95,14 @@ return (
                 tb.play();
             }}
             onPause={() => {
+                if (suppressAudioEventsRef.current) return;
                 const tb = timeBaseRef.current;
                 if (!tb) return;
                 tb.pause();
             }}
 
             onSeeked={() => {
+                if (suppressAudioEventsRef.current) return;
                 const tb = timeBaseRef.current;
                 const audio = takeAudioRef.current;
                 const take = selectedTake; // activeTake
