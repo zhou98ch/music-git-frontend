@@ -84,7 +84,13 @@ setTimeout(() => {
   suppressAudioEventsRef.current = false;
 }, 0);
 ```
-
+---
+### Why not Promise / await audio.play()
+```ts
+await audio.play();
+suppressAudioEventsRef.current = false;
+```
+audio.play() resolve ≠ onPlay is called
 ## Result
 ### Event Flow Diagram (With suppression)
 
