@@ -13,6 +13,7 @@ type TrackViewProps  = {
     onSelectTake: (take: Take | null) => void;
 }
 
+const MIN_WIDTH_PX = 6;
 
 export const TrackView : React.FC<TrackViewProps > = ({trackId, date, takes, totalDurationSec, hoveredTake, onHoverTake, selectedTake, onSelectTake}) => { 
 
@@ -61,6 +62,7 @@ export const TrackView : React.FC<TrackViewProps > = ({trackId, date, takes, tot
                                             position: "absolute",
                                             left: `${leftPercent}%`,
                                             width: `${widthPercent}%`,
+                                            minWidth: `${MIN_WIDTH_PX}px`,
                                             top: "4px",
                                             bottom: "4px",
                                             borderRadius: "4px",
