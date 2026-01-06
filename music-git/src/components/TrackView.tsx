@@ -87,7 +87,7 @@ export const TrackView : React.FC<TrackViewProps > = ({trackId, date, takes, tot
                                             textOverflow: "ellipsis",
                                             cursor: "pointer",
                                     }}> 
-                                    Take {take.id}: {take.startSec}s → {take.endSec}s 
+                                    {/* Take {take.id}: {take.startSec}s → {take.endSec}s  */}
                                 </div>
                                 );
                             })
