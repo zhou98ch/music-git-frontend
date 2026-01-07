@@ -76,6 +76,8 @@ be treated as user intent.
 To keep suppression active until browser media events fire, we clear the flag
 in the next event loop tick:
 
+Only when the last function stack is completed cleared, will the onPlay ((same for setTimeout(fn,0))) be called.
+
 ```ts
 suppressAudioEventsRef.current = true;
 audio.play();
