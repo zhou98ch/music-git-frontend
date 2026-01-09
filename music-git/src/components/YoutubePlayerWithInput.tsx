@@ -6,7 +6,7 @@ import type { AudioMode } from "../hooks/useAudioRecorder";
 import { useMicLevel } from "../hooks/useMicLevel";
 import type { Take, TakeDraft } from "../common/types";
 import { PieceTimeline } from "./PieceTimeline.tsx";
-import { getTodayTrackId, groupTakesByTrack, makeTakeFromDraft } from "../utils/helpers.tsx";
+import { getTodayTrackId, groupTakesByLane, groupTakesByTrack, makeTakeFromDraft } from "../utils/helpers.tsx";
 import {mockTakes} from "../common/types";
 export const YouTubePlayerWithInput: React.FC = () => {
   const mockTotalDurationSec = 120; 
@@ -21,6 +21,7 @@ export const YouTubePlayerWithInput: React.FC = () => {
   const startSecRef = React.useRef<number|null>(null);
   const [takes, setTakes] = React.useState<Take[]>([]);
   const tracks = groupTakesByTrack(takes);
+  const [laneIds, setLaneIds] = React.useState<string[]>(["lane-1"]);
   const [anchorSec, setAnchorSec] = React.useState(0);
   const [audioMode, setAudioMode] = React.useState<AudioMode>("instrument");
   const { isRecording, startRecording, stopRecording, error } = useAudioRecorder({mode: audioMode, deviceId: selectedDeviceId});
@@ -60,6 +61,9 @@ export const YouTubePlayerWithInput: React.FC = () => {
   React.useEffect(() => {
     refreshAudioInputs();
   }, []);
+const initializeLane = () => {
+  setLaneIds((prev) => [...prev, "lane-1"]);
+};
 
   return (
     <div>
@@ -316,6 +320,10 @@ export const YouTubePlayerWithInput: React.FC = () => {
       {/* //////////////////////////////////////////////////////////// */}
       <PieceTimeline totalDurationSec = {mockTotalDurationSec} tracks={tracks} timeBaseRef={timeBaseRef}/>
       {/* ///////// lane selection TODO ///////////////// */}
+      <button
+        onClick={initializeLane}
+      >Create New Lane
+      </button>
       <label style={{ fontSize: 12, color: "#555", marginRight: 8 }}>
         Lane:
       </label>
@@ -324,9 +332,13 @@ export const YouTubePlayerWithInput: React.FC = () => {
         disabled={isRecording}
         onChange={(e) => setSelectedLaneId(e.target.value)}
       >
-        <option value="lane-1">lane-1</option>
+        {laneIds.map((id)=>(
+          <option key={id} value={id} >{id}</option>
+
+        ))}
+        {/* <option value="lane-1">lane-1</option>
         <option value="lane-2">lane-2</option>
-        <option value="lane-3">lane-3</option>
+        <option value="lane-3">lane-3</option> */}
         {/* TODO ADJUST TO MORE LANES*/}
       </select>
 
