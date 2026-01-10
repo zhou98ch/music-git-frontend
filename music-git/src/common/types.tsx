@@ -8,6 +8,7 @@ export type Lane = {
   id: string;
   trackId: string;
   description: string;
+  order: number;
 };
 export type Take = {
   id: string;
