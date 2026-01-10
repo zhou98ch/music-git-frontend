@@ -4,14 +4,14 @@ import type { TimeBase } from "../common/TimeBase.ts";
 import { useAudioRecorder } from "../hooks/useAudioRecorder";
 import type { AudioMode } from "../hooks/useAudioRecorder";
 import { useMicLevel } from "../hooks/useMicLevel";
-import type { Take, TakeDraft } from "../common/types";
+import type { Lane, Take, TakeDraft, Track } from "../common/types";
 import { PieceTimeline } from "./PieceTimeline.tsx";
 import { getTodayTrackId, groupTakesByLane, groupTakesByTrack, makeTakeFromDraft } from "../utils/helpers.tsx";
 import {mockTakes} from "../common/types";
 export const YouTubePlayerWithInput: React.FC = () => {
   const mockTotalDurationSec = 120; 
   const mockSongName = "Demo Song";
-
+  const [selectedTrackId, setSelectedTrackId] = React.useState<string | null>(null);
   const [selectedLaneId, setSelectedLaneId] = React.useState("lane-1");
   const [audioInputs, setAudioInputs] = React.useState<MediaDeviceInfo[]>([]);
   const [selectedDeviceId, setSelectedDeviceId] = React.useState<string>("default");
@@ -20,8 +20,9 @@ export const YouTubePlayerWithInput: React.FC = () => {
   const timeBaseRef = React.useRef<TimeBase | null>(null);
   const startSecRef = React.useRef<number|null>(null);
   const [takes, setTakes] = React.useState<Take[]>([]);
-  const tracks = groupTakesByTrack(takes);
-  const [laneIds, setLaneIds] = React.useState<string[]>(["lane-1"]);
+  // const tracks = groupTakesByTrack(takes);
+  const [tracksList, setTracksList] = React.useState<Track[]>([]);
+  const [lanesList, setLanesList] = React.useState<Lane[]>([]);
   const [anchorSec, setAnchorSec] = React.useState(0);
   const [audioMode, setAudioMode] = React.useState<AudioMode>("instrument");
   const { isRecording, startRecording, stopRecording, error } = useAudioRecorder({mode: audioMode, deviceId: selectedDeviceId});
@@ -32,6 +33,26 @@ export const YouTubePlayerWithInput: React.FC = () => {
     const inputs = devices.filter((d) => d.kind === "audioinput");
     setAudioInputs(inputs);
   };
+  const takesByTrack = React.useMemo(
+    () => groupTakesByTrack(takes),
+    [takes]
+  );
+  const lanesByTrack = React.useMemo(() => {
+    const map: Record<string, Lane[]> = {};
+    for (const l of lanesList) {
+      (map[l.trackId] ??= []).push(l);
+    }
+    for (const trackId of Object.keys(map)) {
+      map[trackId].sort((a, b) => a.order - b.order);
+    }
+    return map;
+  }, [lanesList]);
+  async function loadPiece(pieceId: string) {
+    const data = await api.getPiece(pieceId);
+    setTracksList(data.tracks);
+    setLanesList(data.lanes);
+    setTakes(data.takes);
+  }
 
   // extract a unique identifier from YouTube URL: v=xxx
   function extractVideoId(input: string): string | null {
@@ -61,9 +82,11 @@ export const YouTubePlayerWithInput: React.FC = () => {
   React.useEffect(() => {
     refreshAudioInputs();
   }, []);
-const initializeLane = () => {
-  setLaneIds((prev) => [...prev, "lane-1"]);
-};
+  async function addLane(trackId: string) {
+    const newLane = await api.createLane(trackId);
+    setLanesList((prev) => [...prev, newLane]);
+  }
+
 
   return (
     <div>
@@ -318,10 +341,10 @@ const initializeLane = () => {
       </label>
 
       {/* //////////////////////////////////////////////////////////// */}
-      <PieceTimeline totalDurationSec = {mockTotalDurationSec} tracks={tracks} timeBaseRef={timeBaseRef}/>
+      <PieceTimeline totalDurationSec = {mockTotalDurationSec} tracks={takesByTrack} timeBaseRef={timeBaseRef}/>
       {/* ///////// lane selection TODO ///////////////// */}
       <button
-        onClick={initializeLane}
+        onClick={async=>addLane}
       >Create New Lane
       </button>
       <label style={{ fontSize: 12, color: "#555", marginRight: 8 }}>
@@ -332,8 +355,8 @@ const initializeLane = () => {
         disabled={isRecording}
         onChange={(e) => setSelectedLaneId(e.target.value)}
       >
-        {laneIds.map((id)=>(
-          <option key={id} value={id} >{id}</option>
+        {lanesList.map((l)=>(
+          <option key={l.id} value={l.id} >{l.id}</option>
 
         ))}
         {/* <option value="lane-1">lane-1</option>
