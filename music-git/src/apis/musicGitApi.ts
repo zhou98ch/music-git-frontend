@@ -1,12 +1,17 @@
-import type { Take,Track,Lane } from "../common/types";
+import type { Take, Track, Lane } from "../common/types";
 
 type ApiConfig = {
-  baseUrl: string; 
+  baseUrl?: string;
 };
 
-function createJsonClient(config: ApiConfig) {
+function createJsonClient() {
   async function request<T>(path: string, init?: RequestInit): Promise<T> {
-    const res = await fetch(`${config.baseUrl}${path}`, {
+    const baseUrl = import.meta.env.VITE_API_BASE_URL;
+    if (!baseUrl) {
+      throw new Error("Missing VITE_API_BASE_URL");
+    }
+
+    const res = await fetch(`${baseUrl}${path}`, {
       ...init,
       headers: {
         "Content-Type": "application/json",
@@ -28,6 +33,22 @@ function createJsonClient(config: ApiConfig) {
   return { request };
 }
 
-export function createMusicGitApi(config: ApiConfig) {
-    return {};
+type PieceDTO = {
+  tracks: Track[];
+  lanes: Lane[];
+  takes: Take[];
+};
+
+export function createMusicGitApi() {
+  const client = createJsonClient();
+
+  return {
+    getPieceRecordingsById: (pieceId: string) =>
+      client.request<PieceDTO>(`/pieces/${pieceId}`),
+
+    createLane: (trackId: string) =>
+      client.request<Lane>(`/tracks/${trackId}/lanes`, {
+        method: "POST",
+      }),
+  };
 }
