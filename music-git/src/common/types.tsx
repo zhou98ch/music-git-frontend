@@ -10,6 +10,15 @@ export type Lane = {
   description: string;
   order: number;
 };
+export type Song = {
+  id: number;
+  name: string;
+  artist: string;
+  description: string;
+  isPrivate: number;
+  createdUserId: number;
+  categoryId: number;
+};
 export type Take = {
   id: string;
   trackId: string; // default: trackId = YYYY-MM-DD
