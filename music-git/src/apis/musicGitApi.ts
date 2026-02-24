@@ -1,4 +1,4 @@
-import type { Take, Track, Lane } from "../common/types";
+import type { Song, Take, Track, Lane } from "../common/types";
 
 type ApiConfig = {
   baseUrl?: string;
@@ -33,22 +33,68 @@ function createJsonClient() {
   return { request };
 }
 
+type ApiResult<T> = {
+  code: number;
+  msg?: string;
+  data: T;
+} & Record<string, unknown>;
+
 type PieceDTO = {
   tracks: Track[];
   lanes: Lane[];
   takes: Take[];
 };
 
+function unwrapResult<T>(res: ApiResult<T> | T): T {
+  if (res && typeof res === "object" && "data" in res) {
+    const apiRes = res as ApiResult<T>;
+    if (apiRes.code !== 1) {
+      throw new Error(apiRes.msg || "API error");
+    }
+    return apiRes.data;
+  }
+  return res as T;
+}
+
 export function createMusicGitApi() {
   const client = createJsonClient();
 
   return {
-    getPieceRecordingsById: (pieceId: string) =>
-      client.request<PieceDTO>(`/pieces/${pieceId}`),
+    getSongRecordingsById: async (songId: string | number) => {
+      const res = await client.request<ApiResult<PieceDTO>>(
+        `/api/song/${songId}`
+      );
+      return unwrapResult(res);
+    },
 
-    createLane: (trackId: string) =>
-      client.request<Lane>(`/tracks/${trackId}/lanes`, {
+    listSongsByCategory: async (categoryId: number) => {
+      const res = await client.request<ApiResult<Song[]>>(
+        `/api/song/list/${categoryId}`
+      );
+      return unwrapResult(res);
+    },
+
+    createSong: async (payload: Omit<Song, "id">) => {
+      const res = await client.request<ApiResult<null>>("/api/song/create", {
         method: "POST",
-      }),
+        body: JSON.stringify(payload),
+      });
+      return unwrapResult(res);
+    },
+
+    updateSong: async (payload: Song) => {
+      const res = await client.request<ApiResult<null>>("/api/song/update", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+      return unwrapResult(res);
+    },
+
+    deleteSongById: async (id: number) => {
+      const res = await client.request<ApiResult<null>>(`/api/song/delete/${id}`, {
+        method: "DELETE",
+      });
+      return unwrapResult(res);
+    },
   };
 }
