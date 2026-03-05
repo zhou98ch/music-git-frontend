@@ -4,10 +4,13 @@ import type { TimeBase } from "../common/TimeBase.ts";
 import { useAudioRecorder } from "../hooks/useAudioRecorder";
 import type { AudioMode } from "../hooks/useAudioRecorder";
 import { useMicLevel } from "../hooks/useMicLevel";
-import type { Lane, Take, TakeDraft, Track } from "../common/types";
+import type { Lane, Take, TakeDraft, Track, Song } from "../common/types";
 import { PieceTimeline } from "./PieceTimeline.tsx";
 import { getTodayTrackId, groupTakesByLane, groupTakesByTrack, makeTakeFromDraft } from "../utils/helpers.tsx";
 import {mockTakes} from "../common/types";
+import { createMusicGitApi } from "../apis/musicGitApi";
+
+const api = createMusicGitApi();
 export const YouTubePlayerWithInput: React.FC = () => {
   const mockTotalDurationSec = 120; 
   const mockSongName = "Demo Song";
@@ -23,6 +26,7 @@ export const YouTubePlayerWithInput: React.FC = () => {
   // const tracks = groupTakesByTrack(takes);
   const [tracksList, setTracksList] = React.useState<Track[]>([]);
   const [lanesList, setLanesList] = React.useState<Lane[]>([]);
+  const [, setSongs] = React.useState<Song[]>([]);
   const [anchorSec, setAnchorSec] = React.useState(0);
   const [audioMode, setAudioMode] = React.useState<AudioMode>("instrument");
   const { isRecording, startRecording, stopRecording, error } = useAudioRecorder({mode: audioMode, deviceId: selectedDeviceId});
@@ -47,13 +51,22 @@ export const YouTubePlayerWithInput: React.FC = () => {
     }
     return map;
   }, [lanesList]);
-  async function loadPiece(pieceId: string) {
-    const data = await api.getPiece(pieceId);
-    setTracksList(data.tracks);
-    setLanesList(data.lanes);
-    setTakes(data.takes);
+  async function loadSongsByCategory(categoryId: number) {
+    const data = await api.listSongsByCategory(categoryId);
+    setSongs(data);
   }
+  const categoryId = React.useMemo(() => {
+    const params = new URLSearchParams(window.location.search);
+    const raw = params.get("categoryId");
+    if (!raw) return null;
+    const value = Number(raw);
+    return Number.isNaN(value) ? null : value;
+  }, []);
 
+  React.useEffect(() => {
+    if (categoryId === null) return;
+    void loadSongsByCategory(categoryId);
+  }, [categoryId]);
   // extract a unique identifier from YouTube URL: v=xxx
   function extractVideoId(input: string): string | null {
     try {
