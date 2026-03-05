@@ -5,6 +5,10 @@ type ApiConfig = {
 };
 
 function createJsonClient() {
+    const defaultHeaders = {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer xxx"
+  };
   async function request<T>(path: string, init?: RequestInit): Promise<T> {
     const baseUrl = import.meta.env.VITE_API_BASE_URL;
     if (!baseUrl) {
@@ -14,7 +18,7 @@ function createJsonClient() {
     const res = await fetch(`${baseUrl}${path}`, {
       ...init,
       headers: {
-        "Content-Type": "application/json",
+        ...defaultHeaders,
         ...(init?.headers ?? {}),
       },
     });
