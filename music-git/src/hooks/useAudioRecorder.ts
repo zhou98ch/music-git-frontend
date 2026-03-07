@@ -8,6 +8,7 @@ export function useAudioRecorder(options?: {
     const deviceId = options?.deviceId ?? "default";
     const [isRecording, setIsRecording] = React.useState(false);
     const [audioUrl, setAudioUrl] = React.useState<string | null>(null);
+    const [audioBlob, setAudioBlob] = React.useState<Blob | null>(null);
     const [error, setError] = React.useState<string | null>(null);
 
     const mediaRecorderRef = React.useRef<MediaRecorder | null>(null);
@@ -90,6 +91,7 @@ export function useAudioRecorder(options?: {
             // 8) build final blob on stop
             recorder.onstop = () => {
                 const blob = new Blob(chunksRef.current, { type: recorder.mimeType });
+                setAudioBlob(blob);
                 const url = URL.createObjectURL(blob);
                 setAudioUrl(url);
                 stopResolveRef.current?.({blob, url});
@@ -122,10 +124,10 @@ export function useAudioRecorder(options?: {
           throw new Error("Not recording");
         }
 
-        return new Promise<{blob:Blob; url:string}>((resolve) => {
+        return new Promise<{audioBlob:Blob; audioUrl:string}>((resolve) => {
             stopResolveRef.current = resolve;
             recorder.stop();
         })
     };
-    return { isRecording, startRecording, stopRecording, error, audioUrl  };
+    return { isRecording, startRecording, stopRecording, error, audioUrl, audioBlob  };
 }
