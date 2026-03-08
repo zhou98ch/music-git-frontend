@@ -124,7 +124,7 @@ export function useAudioRecorder(options?: {
           throw new Error("Not recording");
         }
 
-        return new Promise<{audioBlob:Blob; audioUrl:string}>((resolve) => {
+        return new Promise<{blob:Blob; url:string}>((resolve) => {
             stopResolveRef.current = resolve;
             recorder.stop();
         })
