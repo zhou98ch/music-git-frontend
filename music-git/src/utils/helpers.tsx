@@ -67,6 +67,7 @@ export function makeTakeFromDraft(args: {
     description: "",
     evaluation: 0,
     audioUrl: draft.audioUrl,
+    audioBlob: draft.audioBlob,
   };
 }
 
