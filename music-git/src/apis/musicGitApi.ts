@@ -1,8 +1,10 @@
 import type { Song, Take, Track, Lane } from "../common/types";
-
-type ApiConfig = {
-  baseUrl?: string;
-};
+import {
+  createMockLane,
+  getMockSongRecordingsById,
+  listMockSongsByCategory,
+} from "../mocks/musicGitMockStore";
+const USE_MOCK = true;
 
 function createJsonClient() {
     const defaultHeaders = {
@@ -65,6 +67,9 @@ export function createMusicGitApi() {
 
   return {
     getSongRecordingsById: async (songId: string | number) => {
+      if (USE_MOCK) {
+        return getMockSongRecordingsById();
+      }
       const res = await client.request<ApiResult<PieceDTO>>(
         `/api/song/${songId}`
       );
@@ -72,6 +77,9 @@ export function createMusicGitApi() {
     },
 
     listSongsByCategory: async (categoryId: number) => {
+      if (USE_MOCK) {
+        return listMockSongsByCategory(categoryId);
+      }
       const res = await client.request<ApiResult<Song[]>>(
         `/api/song/list/${categoryId}`
       );
@@ -100,5 +108,24 @@ export function createMusicGitApi() {
       });
       return unwrapResult(res);
     },
+
+    updateSongTakes: async (payload: Take[], id: String)=>{
+      const res = await client.request<ApiResult<null>>(`/api/song/${id}/takes`, {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+      return unwrapResult(res);
+    },
+    
+    createLane: async (trackId: string) => {
+      if (USE_MOCK) {
+        return createMockLane(trackId);
+      }
+      const res = await client.request<ApiResult<Lane>>(`/api/song/track/${trackId}/createLane`, {
+        method: "POST",
+      });
+      return unwrapResult(res);
+    }
+    
   };
 }
