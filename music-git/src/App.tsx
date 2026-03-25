@@ -1,18 +1,13 @@
 // src/App.tsx
 
-import {mockTakes} from "./common/types";
-import { AudioRecorder } from "./components/AudioRecorder";
-import { BilibiliPlayer } from "./components/BilibiliPlayer";
-import { BilibiliPlayerWithInput } from "./components/BilibiliPlayerWithInput";
-import { BiliIFrameProbe } from "./components/BiliIFrameProbe";
-import { PieceTimeline } from "./components/PieceTimeline";
+// import {mockTakes} from "./common/types";
+
 import { YouTubePlayerWithInput } from "./components/YoutubePlayerWithInput";
-import { groupTakesByTrack } from "./utils/helpers";
 function App() {
   const mockTotalDurationSec = 120; 
   const mockSongName = "Demo Song";
-  const tracks = groupTakesByTrack(mockTakes);
-  console.log("Grouped Takes by Track:", tracks);
+  // const tracks = groupTakesByTrack(mockTakes);
+  // console.log("Grouped Takes by Track:", tracks);
   return (
     <>
         <div style={{ padding: 20, maxWidth: 800, margin: "0 auto" }}>
@@ -25,10 +20,6 @@ function App() {
           <div style={{ padding: 20 }}>
             <YouTubePlayerWithInput />
           </div>
-          <PieceTimeline totalDurationSec = {mockTotalDurationSec} tracks={tracks}/>
-        </div>
-        <div style={{ padding: 20 }}>
-          <AudioRecorder />
         </div>
     </>
 
