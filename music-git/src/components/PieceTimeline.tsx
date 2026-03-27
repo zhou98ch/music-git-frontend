@@ -1,15 +1,17 @@
 import React from "react";
-import type { Take, TakeDraft } from "../common/types";
+import type { Lane, Take, Track } from "../common/types";
 import { TrackView } from "./TrackView";
 import { PieceGlobalAxis } from "./PieceGlobalAxis";
 import { SelectedTakePanel } from "./SelectedTakePanel";
 import type { TimeBase } from "../common/TimeBase";
 type PieceTimelineProps  = {
     totalDurationSec: number;
+    trackMeta: Track[];
+    lanesByTrack: Record<string, Lane[]>;
     tracks:Record<string, Take[]>; // key: trackId, value: all takes for this song pieces; takes belong to different lanes, and lanes belong to different tracks
     timeBaseRef:React.RefObject<TimeBase | null>;
 }
-export const PieceTimeline : React.FC<PieceTimelineProps > = ({totalDurationSec, tracks, timeBaseRef}) => {
+export const PieceTimeline : React.FC<PieceTimelineProps > = ({totalDurationSec, trackMeta, lanesByTrack, tracks, timeBaseRef}) => {
     const [hoveredTake, setHoveredTake] = React.useState<Take | null>(null);
     const [selectedTake, setSelectedTake] = React.useState<Take | null>(null);
     const [selectedTakeId, setselectedTakeId] = React.useState<string | null>(null);
@@ -63,12 +65,13 @@ return (
             <div style={{ flex: 1 }}>
             <PieceGlobalAxis totalDurationSec={totalDurationSec} hoveredTake={hoveredTake} />
 
-            {Object.entries(tracks).map(([trackId, takes]) => (
+            {trackMeta.map((track) => (
                 <TrackView
-                    key={trackId}
-                    trackId={trackId}
-                    date={trackId}
-                    takes={takes}
+                    key={track.id}
+                    trackId={track.id}
+                    date={track.date}
+                    lanes={lanesByTrack[track.id] ?? []}
+                    takes={tracks[track.id] ?? []}
                     totalDurationSec={totalDurationSec}
                     hoveredTake={hoveredTake}
                     onHoverTake={setHoveredTake}
