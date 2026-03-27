@@ -1,10 +1,10 @@
 import React from "react";
-import type { Take } from "../common/types";
-import { groupTakesByLane } from "../utils/helpers";
+import type { Lane, Take } from "../common/types";
 
 type TrackViewProps  = {
     trackId: string;
     date?: string;
+    lanes: Lane[];
     takes: Take[];
     totalDurationSec: number;
     hoveredTake: Take | null;
@@ -15,9 +15,7 @@ type TrackViewProps  = {
 
 const MIN_WIDTH_PX = 6;
 
-export const TrackView : React.FC<TrackViewProps > = ({trackId, date, takes, totalDurationSec, hoveredTake, onHoverTake, selectedTake, onSelectTake}) => { 
-
-    const lanes = groupTakesByLane(takes);
+export const TrackView : React.FC<TrackViewProps > = ({trackId, lanes, takes, totalDurationSec, hoveredTake, onHoverTake, selectedTake, onSelectTake}) => { 
     // const [hoveredTake, setHoveredTake] = React.useState<Take | null>(null);
     return( <>
     {/* <div>Track Timeline for {trackId} on {date}, with {takes.length} takes
@@ -28,10 +26,15 @@ export const TrackView : React.FC<TrackViewProps > = ({trackId, date, takes, tot
     <div className="track-row" style={{background: " #ffe2ceff"}}>
         {/* <p>.</p> */}
         <div className="track-title" style={{background: " #fff0ceff"}}>Track on {trackId}</div>
-        { Object.entries(lanes).map(([laneId, laneTakes])=> (
-            <div className="lane-row" key = {laneId} style={{background: " #dbceffff", marginBottom: "12px" }}>
+        { lanes.map((lane) => {
+            const laneTakes = takes
+                .filter((take) => take.laneId === lane.id)
+                .sort((a, b) => a.startSec - b.startSec);
+
+            return (
+            <div className="lane-row" key = {lane.id} style={{background: " #dbceffff", marginBottom: "12px" }}>
                 {/* <p>.</p> */}
-                <div className="lane-title" style={{background: " #c8c8c8ff"}}> Lane {laneId}: </div>
+                <div className="lane-title" style={{background: " #c8c8c8ff"}}> Lane {lane.description || lane.id}: </div>
                     <div
                         style={{
                         position: "relative",
@@ -96,9 +99,8 @@ export const TrackView : React.FC<TrackViewProps > = ({trackId, date, takes, tot
                     </div>
                 {/* <p>.</p> */}
             </div>
-                
-        ))
-        }
+            );
+        })}
 
 
 
