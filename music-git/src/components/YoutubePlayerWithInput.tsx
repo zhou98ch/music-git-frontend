@@ -6,16 +6,14 @@ import type { AudioMode } from "../hooks/useAudioRecorder";
 import { useMicLevel } from "../hooks/useMicLevel";
 import type { Lane, Take, TakeDraft, Track, Song } from "../common/types";
 import { PieceTimeline } from "./PieceTimeline.tsx";
-import { getTodayTrackId, groupTakesByLane, groupTakesByTrack, makeTakeFromDraft } from "../utils/helpers.tsx";
-import {mockTakes} from "../common/types";
+import { groupTakesByTrack, makeTakeFromDraft } from "../utils/helpers.tsx";
 import { createMusicGitApi } from "../apis/musicGitApi";
 
 const api = createMusicGitApi();
 export const YouTubePlayerWithInput: React.FC = () => {
   const mockTotalDurationSec = 120; 
-  const mockSongName = "Demo Song";
-  const [selectedTrackId, setSelectedTrackId] = React.useState<string | null>(null);
-  const [selectedLaneId, setSelectedLaneId] = React.useState("lane-1");
+  const [selectedTrackId, setSelectedTrackId] = React.useState<string>("");
+  const [selectedLaneId, setSelectedLaneId] = React.useState("");
   const [audioInputs, setAudioInputs] = React.useState<MediaDeviceInfo[]>([]);
   const [selectedDeviceId, setSelectedDeviceId] = React.useState<string>("default");
   const [url, setUrl] = React.useState("");
@@ -51,9 +49,19 @@ export const YouTubePlayerWithInput: React.FC = () => {
     }
     return map;
   }, [lanesList]);
+  const selectedTrackLanes = React.useMemo(
+    () => lanesByTrack[selectedTrackId] ?? [],
+    [lanesByTrack, selectedTrackId]
+  );
   async function loadSongsByCategory(categoryId: number) {
     const data = await api.listSongsByCategory(categoryId);
     setSongs(data);
+  }
+  async function loadMockPiece() {
+    const piece = await api.getSongRecordingsById(1);
+    setTracksList(piece.tracks);
+    setLanesList(piece.lanes);
+    setTakes(piece.takes);
   }
   const categoryId = React.useMemo(() => {
     const params = new URLSearchParams(window.location.search);
@@ -95,9 +103,30 @@ export const YouTubePlayerWithInput: React.FC = () => {
   React.useEffect(() => {
     refreshAudioInputs();
   }, []);
+  React.useEffect(() => {
+    void loadMockPiece();
+  }, []);
+  React.useEffect(() => {
+    if (!tracksList.length) return;
+    if (!selectedTrackId || !tracksList.some((track) => track.id === selectedTrackId)) {
+      setSelectedTrackId(tracksList[0].id);
+    }
+  }, [tracksList, selectedTrackId]);
+  React.useEffect(() => {
+    if (!selectedTrackId) return;
+    const lanes = lanesByTrack[selectedTrackId] ?? [];
+    if (!lanes.length) {
+      setSelectedLaneId("");
+      return;
+    }
+    if (!selectedLaneId || !lanes.some((lane) => lane.id === selectedLaneId)) {
+      setSelectedLaneId(lanes[0].id);
+    }
+  }, [lanesByTrack, selectedLaneId, selectedTrackId]);
   async function addLane(trackId: string) {
     const newLane = await api.createLane(trackId);
     setLanesList((prev) => [...prev, newLane]);
+    setSelectedLaneId(newLane.id);
   }
 
 
@@ -204,7 +233,7 @@ export const YouTubePlayerWithInput: React.FC = () => {
             )}
           </div>
 
-          <button onClick={async (e)=>{
+          <button onClick={async ()=>{
             const tb = timeBaseRef.current;
             if (!tb) {
               console.warn("TimeBase not ready yet");
@@ -229,13 +258,14 @@ export const YouTubePlayerWithInput: React.FC = () => {
                 startSec,
                 endSec,
                 recordedTime: Date.now(),
-                audioUrl: audio.url
+                audioUrl: audio.url,
+                audioBlob: audio.blob,
               };
               setTakes((prev) => {
                 const newTake = makeTakeFromDraft({
                   draft: takeDraft,
-                  trackId: getTodayTrackId(),
-                  laneId: selectedLaneId ?? "lane-1",
+                  trackId: selectedTrackId,
+                  laneId: selectedLaneId,
                   existingTakes: prev,
                 });
                 console.log("TAKE:", newTake);
@@ -354,22 +384,46 @@ export const YouTubePlayerWithInput: React.FC = () => {
       </label>
 
       {/* //////////////////////////////////////////////////////////// */}
-      <PieceTimeline totalDurationSec = {mockTotalDurationSec} tracks={takesByTrack} timeBaseRef={timeBaseRef}/>
+      <PieceTimeline
+        totalDurationSec={mockTotalDurationSec}
+        trackMeta={tracksList}
+        lanesByTrack={lanesByTrack}
+        tracks={takesByTrack}
+        timeBaseRef={timeBaseRef}
+      />
       {/* ///////// lane selection TODO ///////////////// */}
       <button
-        onClick={async=>addLane}
+        onClick={() => {
+          if (!selectedTrackId) return;
+          void addLane(selectedTrackId);
+        }}
+        disabled={!selectedTrackId}
       >Create New Lane
       </button>
+      <label style={{ fontSize: 12, color: "#555", marginRight: 8, marginLeft: 12 }}>
+        Track:
+      </label>
+      <select
+        value={selectedTrackId}
+        disabled={isRecording}
+        onChange={(e) => setSelectedTrackId(e.target.value)}
+      >
+        {tracksList.map((track) => (
+          <option key={track.id} value={track.id}>
+            {track.date} - {track.description}
+          </option>
+        ))}
+      </select>
       <label style={{ fontSize: 12, color: "#555", marginRight: 8 }}>
         Lane:
       </label>
       <select
         value={selectedLaneId}
-        disabled={isRecording}
+        disabled={isRecording || selectedTrackLanes.length === 0}
         onChange={(e) => setSelectedLaneId(e.target.value)}
       >
-        {lanesList.map((l)=>(
-          <option key={l.id} value={l.id} >{l.id}</option>
+        {selectedTrackLanes.map((l)=>(
+          <option key={l.id} value={l.id} >{l.description || l.id}</option>
 
         ))}
         {/* <option value="lane-1">lane-1</option>
