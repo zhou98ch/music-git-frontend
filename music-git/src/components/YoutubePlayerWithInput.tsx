@@ -12,8 +12,8 @@ import { createMusicGitApi } from "../apis/musicGitApi";
 const api = createMusicGitApi();
 export const YouTubePlayerWithInput: React.FC = () => {
   const mockTotalDurationSec = 120; 
-  const [selectedTrackId, setSelectedTrackId] = React.useState<string>("");
-  const [selectedLaneId, setSelectedLaneId] = React.useState("");
+  const [selectedTrackId, setSelectedTrackId] = React.useState<number | null>(null);
+  const [selectedLaneId, setSelectedLaneId] = React.useState<number | null>(null);
   const [audioInputs, setAudioInputs] = React.useState<MediaDeviceInfo[]>([]);
   const [selectedDeviceId, setSelectedDeviceId] = React.useState<string>("default");
   const [url, setUrl] = React.useState("");
@@ -40,17 +40,17 @@ export const YouTubePlayerWithInput: React.FC = () => {
     [takes]
   );
   const lanesByTrack = React.useMemo(() => {
-    const map: Record<string, Lane[]> = {};
+    const map: Record<number, Lane[]> = {};
     for (const l of lanesList) {
       (map[l.trackId] ??= []).push(l);
     }
-    for (const trackId of Object.keys(map)) {
+    for (const trackId of Object.keys(map).map(Number)) {
       map[trackId].sort((a, b) => a.order - b.order);
     }
     return map;
   }, [lanesList]);
   const selectedTrackLanes = React.useMemo(
-    () => lanesByTrack[selectedTrackId] ?? [],
+    () => (selectedTrackId === null ? [] : lanesByTrack[selectedTrackId] ?? []),
     [lanesByTrack, selectedTrackId]
   );
   async function loadSongsByCategory(categoryId: number) {
@@ -116,15 +116,20 @@ export const YouTubePlayerWithInput: React.FC = () => {
     if (!selectedTrackId) return;
     const lanes = lanesByTrack[selectedTrackId] ?? [];
     if (!lanes.length) {
-      setSelectedLaneId("");
+      setSelectedLaneId(null);
       return;
     }
     if (!selectedLaneId || !lanes.some((lane) => lane.id === selectedLaneId)) {
       setSelectedLaneId(lanes[0].id);
     }
   }, [lanesByTrack, selectedLaneId, selectedTrackId]);
-  async function addLane(trackId: string) {
-    const newLane = await api.createLane(trackId);
+  async function addLane(trackId: number) {
+    const newLaneInfo = {
+      trackId,
+      description:"TODO ADD DESCRIPTION",
+      order:(lanesByTrack[trackId] ?? []).length + 1
+    }
+    const newLane = await api.createLane(newLaneInfo, trackId);
     setLanesList((prev) => [...prev, newLane]);
     setSelectedLaneId(newLane.id);
   }
@@ -264,8 +269,8 @@ export const YouTubePlayerWithInput: React.FC = () => {
               setTakes((prev) => {
                 const newTake = makeTakeFromDraft({
                   draft: takeDraft,
-                  trackId: selectedTrackId,
-                  laneId: selectedLaneId,
+                  trackId: selectedTrackId!,
+                  laneId: selectedLaneId!,
                   existingTakes: prev,
                 });
                 console.log("TAKE:", newTake);
@@ -404,13 +409,13 @@ export const YouTubePlayerWithInput: React.FC = () => {
         Track:
       </label>
       <select
-        value={selectedTrackId}
+        value={selectedTrackId ?? ""}
         disabled={isRecording}
-        onChange={(e) => setSelectedTrackId(e.target.value)}
+        onChange={(e) => setSelectedTrackId(Number(e.target.value))}
       >
         {tracksList.map((track) => (
           <option key={track.id} value={track.id}>
-            {track.date} - {track.description}
+            {track.createdDate} - {track.description}
           </option>
         ))}
       </select>
@@ -418,9 +423,9 @@ export const YouTubePlayerWithInput: React.FC = () => {
         Lane:
       </label>
       <select
-        value={selectedLaneId}
+        value={selectedLaneId ?? ""}
         disabled={isRecording || selectedTrackLanes.length === 0}
-        onChange={(e) => setSelectedLaneId(e.target.value)}
+        onChange={(e) => setSelectedLaneId(Number(e.target.value))}
       >
         {selectedTrackLanes.map((l)=>(
           <option key={l.id} value={l.id} >{l.description || l.id}</option>

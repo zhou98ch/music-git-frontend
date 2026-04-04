@@ -21,40 +21,38 @@ const mockSongs: Song[] = [
 const initialPiece: PieceDTO = {
   tracks: [
     {
-      id: "2026-03-12",
-      date: "2026-03-12",
-      laneIds: ["lane-2026-03-12-1", "lane-2026-03-12-2"],
+      id: 1,
+      createdDate: "2026-03-12",
       description: "Yesterday practice",
     },
     {
-      id: "2026-03-13",
-      date: "2026-03-13",
-      laneIds: ["lane-2026-03-13-1", "lane-2026-03-13-2"],
+      id: 2,
+      createdDate: "2026-03-13",
       description: "Today practice",
     },
   ],
   lanes: [
     {
-      id: "lane-2026-03-12-1",
-      trackId: "2026-03-12",
+      id: 101,
+      trackId: 1,
       description: "Main vocal",
       order: 1,
     },
     {
-      id: "lane-2026-03-12-2",
-      trackId: "2026-03-12",
+      id: 102,
+      trackId: 1,
       description: "Harmony",
       order: 2,
     },
     {
-      id: "lane-2026-03-13-1",
-      trackId: "2026-03-13",
+      id: 201,
+      trackId: 2,
       description: "Lead take",
       order: 1,
     },
     {
-      id: "lane-2026-03-13-2",
-      trackId: "2026-03-13",
+      id: 202,
+      trackId: 2,
       description: "Alt phrasing",
       order: 2,
     },
@@ -62,8 +60,8 @@ const initialPiece: PieceDTO = {
   takes: [
     {
       id: "mock-take-1",
-      trackId: "2026-03-12",
-      laneId: "lane-2026-03-12-1",
+      trackId: 1,
+      laneId: 101,
       startSec: 5,
       endSec: 18,
       recordedAt: 1,
@@ -75,8 +73,8 @@ const initialPiece: PieceDTO = {
     },
     {
       id: "mock-take-2",
-      trackId: "2026-03-12",
-      laneId: "lane-2026-03-12-2",
+      trackId: 1,
+      laneId: 102,
       startSec: 22,
       endSec: 34,
       recordedAt: 1,
@@ -88,8 +86,8 @@ const initialPiece: PieceDTO = {
     },
     {
       id: "mock-take-3",
-      trackId: "2026-03-13",
-      laneId: "lane-2026-03-13-1",
+      trackId: 2,
+      laneId: 201,
       startSec: 8,
       endSec: 26,
       recordedAt: 1,
@@ -120,24 +118,19 @@ export function getMockSongRecordingsById(): PieceDTO {
   return clonePiece();
 }
 
-export function createMockLane(trackId: string): Lane {
+export function createMockLane(trackId: number): Lane {
   const siblings = mockPieceState.lanes
     .filter((lane) => lane.trackId === trackId)
     .sort((a, b) => a.order - b.order);
   const order = siblings.length + 1;
   const newLane: Lane = {
-    id: `lane-${trackId}-${order}`,
+    id: trackId * 100 + order,
     trackId,
     description: `Lane ${order}`,
     order,
   };
 
   mockPieceState.lanes.push(newLane);
-
-  const track = mockPieceState.tracks.find((item) => item.id === trackId);
-  if (track) {
-    track.laneIds = [...track.laneIds, newLane.id];
-  }
 
   return newLane;
 }

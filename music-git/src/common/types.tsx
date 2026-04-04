@@ -1,12 +1,11 @@
 export type Track = { // One track is for one day
-  id: string;
-  date: string;
-  laneIds: string[];
+  id: number;
   description: string;
+  createdDate: string;
 };
 export type Lane = {
-  id: string;
-  trackId: string;
+  id: number;
+  trackId: number;
   description: string;
   order: number;
 };
@@ -21,8 +20,8 @@ export type Song = {
 };
 export type Take = {
   id: string;
-  trackId: string; // default: trackId = YYYY-MM-DD
-  laneId: string;
+  trackId: number;
+  laneId: number;
   startSec: number; //starting time point of this recording take in this song
   endSec: number; //ending time point of this recording take in this song
   recordedAt: number; //at which order number is this take recorded among all takes in this lane

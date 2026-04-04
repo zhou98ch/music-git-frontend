@@ -7,9 +7,9 @@ import type { Take, TakeDraft } from "../common/types";
 // Die Functionen wie Gruppierung erfolgt im Frontend, weil die UI flexibel bleibt:
 // verschiedene Ansichten (nach Datum, Lane, Bewertung usw.) können
 // ohne Änderungen am Backend umgesetzt werden.
-export function groupTakesByTrack(takes: Take[]): Record<string, Take[]>
+export function groupTakesByTrack(takes: Take[]): Record<number, Take[]>
 {
-  const groupedTakes: Record<string, Take[]> = {}; 
+  const groupedTakes: Record<number, Take[]> = {}; 
   for (const take of takes) {
     const trackId = take.trackId;
     if (!groupedTakes[trackId]) {
@@ -17,14 +17,14 @@ export function groupTakesByTrack(takes: Take[]): Record<string, Take[]>
     }
     groupedTakes[trackId].push(take);
   }
-  for (const trackId in groupedTakes) {
+  for (const trackId of Object.keys(groupedTakes).map(Number)) {
     groupedTakes[trackId].sort((a, b) => a.recordedAt - b.recordedAt); //ascending order, old → new
   }
   return groupedTakes;
 }
 
-export function groupTakesByLane(allTakesInTrack: Take[]):Record<string, Take[]>{
-  const groupedTakesByLane: Record<string, Take[]> = {};
+export function groupTakesByLane(allTakesInTrack: Take[]):Record<number, Take[]>{
+  const groupedTakesByLane: Record<number, Take[]> = {};
   for (const take of allTakesInTrack) {
     const laneId = take.laneId;
     if(!groupedTakesByLane[laneId]){
@@ -32,23 +32,15 @@ export function groupTakesByLane(allTakesInTrack: Take[]):Record<string, Take[]>
     }
     groupedTakesByLane[laneId].push(take);
   }
-  for (const laneId in groupedTakesByLane) {
+  for (const laneId of Object.keys(groupedTakesByLane).map(Number)) {
     groupedTakesByLane[laneId].sort((a, b) => a.startSec - b.startSec); //ascending order, beginning → end
   }
   return groupedTakesByLane;
 }
-export function getTodayTrackId(): string {
-  const d = new Date()
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-}
-
 export function makeTakeFromDraft(args: {
   draft: TakeDraft;
-  trackId: string;
-  laneId: string;
+  trackId: number;
+  laneId: number;
   existingTakes: Take[];
 }): Take {
   const { draft, trackId, laneId, existingTakes } = args;
