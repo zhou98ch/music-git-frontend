@@ -1,3 +1,4 @@
+import type { CreateLaneInput } from "../common/inputTypes";
 import type { Song, Take, Track, Lane } from "../common/types";
 import {
   createMockLane,
@@ -109,7 +110,7 @@ export function createMusicGitApi() {
       return unwrapResult(res);
     },
 
-    updateSongTakes: async (payload: Take[], id: String)=>{
+    updateSongTakes: async (payload: Take[], id: number)=>{
       const res = await client.request<ApiResult<null>>(`/api/song/${id}/takes`, {
         method: "POST",
         body: JSON.stringify(payload),
@@ -117,12 +118,13 @@ export function createMusicGitApi() {
       return unwrapResult(res);
     },
     
-    createLane: async (trackId: string) => {
+    createLane: async (payload: CreateLaneInput, trackId: number) => {
       if (USE_MOCK) {
         return createMockLane(trackId);
       }
-      const res = await client.request<ApiResult<Lane>>(`/api/song/track/${trackId}/createLane`, {
+      const res = await client.request<ApiResult<Lane>>(`/api/record/track/${trackId}/createLane`, {
         method: "POST",
+        body: JSON.stringify(payload),
       });
       return unwrapResult(res);
     }
