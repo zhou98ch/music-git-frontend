@@ -1,7 +1,7 @@
 **The goal is to make music practice easier to review, and progress easier to notice.**
 # music-git
 
-music-git is an experimental tool for recording and reviewing instrument practice,  **inspired by Git**.
+music-git is an tool for recording and reviewing instrument practice,  **inspired by Git**.
 
 When practicing an instrument, people often play along with something:
 the original recording, a performance video, or a video with scrolling notation.
@@ -15,6 +15,13 @@ Each recording is aligned to the same video time,
 making it easy to look back, compare different attempts,
 and see how your practice has evolved over time.
 
+Feature Description:
+
+Users can load a YouTube video as a reference track.
+Users can record audio takes at a chosen timeline position.
+Recording-Takes are organized into tracks and lanes for comparison and review.
+The interface supports take selection, playback, and basic monitoring.
+
 The idea is similar to Git:
 each practice attempt is a new “take”/("commit") of a specific section. History recording can be tracked,
 and the latest version can be easily compared with previous attempts.
@@ -26,24 +33,21 @@ cd music-git
 npm install
 npm run dev
 ```
-# Current Status
+# Development Log
 
- - [x] MediaRecorder-based microphone recording
-
- - [x] Promise-based stop flow (awaitable recording finalization)
-
- - [x] YouTube IFrame Player integration
-
- - [x] TimeBase abstraction and adapter
-
- - [x] Git-like data model (Track / Lane / Take)
-
- - [ ] Timeline playback synchronization
+ - [x] Built the core recording timeline prototype for the music practice app.
+ - [x] Added YouTube video loading and playback integration.
+ - [x] Implemented browser-based audio recording with microphone input selection.
+ - [x] Added recording mode switching for instrument and voice input.
+ - [x] Created a timeline UI to display takes by track and lane.
+ - [x] Added take selection and synchronized playback behavior.
+ - [x] Set up mock API and mock data store for frontend development.
 
  - [ ] Persistent storage / backend
 
-- [ ]  Practice analytics and comparison tools
-- [ ]  Deployment on web server
+ - [ ]  Practice analytics and comparison tools
+  
+ - [ ]  Deployment on web server
 
 
 # Design Ideas
